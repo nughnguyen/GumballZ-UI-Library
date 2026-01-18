@@ -19,25 +19,61 @@ local MarketplaceService = game:GetService("MarketplaceService")
 
 -- Helper function to open URLs
 local function OpenUrl(link)
+	-- 1. Always copy to clipboard first as a guaranteed fallback
 	if setclipboard then
 		setclipboard(link)
 	end
 	
-	-- Try various methods often available in executors
-	if rawget(getgenv(), "visit") then 
-		pcall(visit, link) 
-	elseif rawget(getgenv(), "openurl") then
-		pcall(openurl, link)
-	else
-		local success = pcall(function()
+	local opened = false
+
+	-- 2. Try Executor Specific functions
+	if getgenv and getgenv().request then
+		-- Some executors intercept requests to localhost/specific schemes to open browser
+		-- But standard 'request' just makes an HTTP request.
+		-- We typically rely on 'visit' or 'openurl'
+	end
+
+	if not opened and getgenv and rawget(getgenv(), "visit") then 
+		local s = pcall(visit, link) 
+		if s then opened = true end
+	end
+	
+	if not opened and getgenv and rawget(getgenv(), "openurl") then
+		local s = pcall(openurl, link)
+		if s then opened = true end
+	end
+
+	-- 3. Try Roblox Services (Works in standard client if allowed/policy service permits)
+	if not opened then
+		local s = pcall(function()
 			game:GetService("GuiService"):OpenBrowserWindow(link)
 		end)
-		
-		if not success then
-			pcall(function()
-				game:GetService("LinkingService"):OpenUrl(link)
-			end)
-		end
+		if s then opened = true end
+	end
+	
+	-- 4. Try LinkingService (Older method, sometimes works)
+	if not opened then
+		local s = pcall(function()
+			game:GetService("LinkingService"):OpenUrl(link)
+		end)
+		if s then opened = true end
+	end
+
+    -- 5. Notify user
+	if not opened then
+		-- If we couldn't auto-open, tell them it's copied
+		if Notification and Notification.Notify then
+            Notification:Notify({Title = "Link Copied", Content = "Paste it in your browser!", Icon = "clipboard", Duration = 3})
+        else
+            -- Check for StarterGui fallback if UI lib not ready
+             pcall(function()
+                game:GetService("StarterGui"):SetCore("SendNotification", {
+                    Title = "Link Copied";
+                    Text = "Paste it in your browser!";
+                    Duration = 3;
+                })
+             end)
+        end
 	end
 end
 
