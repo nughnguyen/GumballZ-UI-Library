@@ -6351,6 +6351,23 @@ function GumballZ.new(Window: Window)
 			});
 		end;
 
+        -- Ensure these are available here in the elements table scope too if needed, 
+        -- but CreateElements returns a fresh table with them defined so we rely on that.
+        -- If AddSection returns the result of CreateElements, and CreateElements has AddDivider/AddParagraph 
+        -- (which we added earlier), then it should work nested.
+        -- Let's double check if we missed adding them to the elements table returned by CreateElements.
+        -- We did add them to `elements` table in step 129 and 139.
+        -- So that part is correct.
+        
+        -- However, there is a chance UIListLayout AbsoluteContentSize update doesn't trigger for new item types?
+        -- The UIListLayout code (lines 6326+) listens to AbsoluteContentSize.
+        -- Divider and Paragraph are sized Frames, so UIListLayout should pick them up.
+        
+        -- One subtle issue: Config.Height in AddSection might be static or not updating correctly?
+        -- Or maybe specific ZIndex issues?
+        
+        -- Let's Verify AddDivider implementation again.
+        
 		return MenuLib;
 	end;
 

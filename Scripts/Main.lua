@@ -1,4 +1,23 @@
-local GumballZ = loadstring(game:HttpGet("https://raw.githubusercontent.com/nughnguyen/GumballZ-UI-Library/refs/heads/main/GUI/GumballZ-UI-Lib.lua"))();
+local function GetFileContent(path)
+	if readfile then
+		return readfile(path)
+	end
+	if getgenv and getgenv().readfile then
+		return getgenv().readfile(path)
+	end
+	return nil
+end
+
+local LibraryContent = pcall(function() return GetFileContent("GUI/GumballZ-UI-Lib.lua") end) and GetFileContent("GUI/GumballZ-UI-Lib.lua")
+
+local GumballZ
+if LibraryContent then
+	GumballZ = loadstring(LibraryContent)()
+else
+	warn("Could not find local library file, loading from web (Edits will not appear)")
+	GumballZ = loadstring(game:HttpGet("https://raw.githubusercontent.com/nughnguyen/GumballZ-UI-Library/refs/heads/main/GUI/GumballZ-UI-Lib.lua"))();
+end
+
 local Notification = GumballZ:CreateNotifier();
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
