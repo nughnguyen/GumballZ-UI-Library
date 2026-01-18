@@ -4141,6 +4141,14 @@ function GumballZ.new(Window: Window)
 	Window.Scale = Window.Scale or UDim2.new(0, 750, 0, 500);
 	Window.Keybind = Window.Keybind or "Insert";
 	Window.Expire = Window.Expire or "never";
+	Window.KeySettings = Window.KeySettings or {};
+	Window.KeySettings.Title = Window.KeySettings.Title or "Key System";
+	Window.KeySettings.Subtitle = Window.KeySettings.Subtitle or "Link in description";
+	Window.KeySettings.Note = Window.KeySettings.Note or "No Key Note";
+	Window.KeySettings.FileName = Window.KeySettings.FileName or "Key";
+	Window.KeySettings.SaveKey = Window.KeySettings.SaveKey or false;
+	Window.KeySettings.GrabKeyFromSite = Window.KeySettings.GrabKeyFromSite or false;
+	Window.KeySettings.Key = Window.KeySettings.Key or {};
 
 	local Gum = {
 		Menus = {},
@@ -4151,6 +4159,219 @@ function GumballZ.new(Window: Window)
 	};
 
 	Gum.Notifier = GumballZ.__NOTIFIER_CACHE or GumballZ:CreateNotifier();
+
+	-- Key System Implementation
+	if Window.KeySettings and Window.KeySettings.Key and (typeof(Window.KeySettings.Key) == "string" and Window.KeySettings.Key ~= "" or typeof(Window.KeySettings.Key) == "table" and #Window.KeySettings.Key > 0) then
+		local KeySettings = Window.KeySettings
+		local savedKey = ""
+		local success = false
+		
+		if KeySettings.SaveKey then
+			if isfile(KeySettings.FileName..".key") then
+				savedKey = readfile(KeySettings.FileName..".key")
+			end
+		end
+
+		if savedKey ~= "" then
+			if typeof(KeySettings.Key) == "table" then
+				if table.find(KeySettings.Key, savedKey) then
+					success = true
+				end
+			elseif typeof(KeySettings.Key) == "string" then
+				if savedKey == KeySettings.Key then
+					success = true
+				end
+			end
+		end
+		
+		if success then
+			Gum.Notifier:Notify({
+				Title = "Key System",
+				Content = "Key found from save file!",
+				Icon = "key",
+				Duration = 5,
+			})
+		else
+			local KeySystemGui = Instance.new("ScreenGui")
+			KeySystemGui.Name = GumballZ:RandomString()
+			KeySystemGui.Parent = CoreGui
+			KeySystemGui.IgnoreGuiInset = true
+			
+			local verified = false
+
+			local MainFrame = Instance.new("Frame")
+			local UIStroke = Instance.new("UIStroke")
+			local UICorner = Instance.new("UICorner")
+			local Title = Instance.new("TextLabel")
+			local Subtitle = Instance.new("TextLabel")
+			local Note = Instance.new("TextLabel")
+			local KeyInput = Instance.new("TextBox")
+			local KeyInputCorner = Instance.new("UICorner")
+			local KeyInputStroke = Instance.new("UIStroke")
+			local CheckKeyButton = Instance.new("TextButton")
+			local CheckKeyCorner = Instance.new("UICorner")
+			local GetKeyButton = Instance.new("TextButton")
+			local GetKeyCorner = Instance.new("UICorner")
+
+			MainFrame.Name = "MainFrame"
+			MainFrame.Parent = KeySystemGui
+			MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+			MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+			MainFrame.BorderSizePixel = 0
+			MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+			MainFrame.Size = UDim2.new(0, 350, 0, 180)
+
+			UIStroke.Color = Color3.fromRGB(45, 45, 45)
+			UIStroke.Thickness = 1
+			UIStroke.Parent = MainFrame
+
+			UICorner.CornerRadius = UDim.new(0, 6)
+			UICorner.Parent = MainFrame
+
+			Title.Name = "Title"
+			Title.Parent = MainFrame
+			Title.BackgroundTransparency = 1.000
+			Title.Position = UDim2.new(0, 20, 0, 15)
+			Title.Size = UDim2.new(1, -40, 0, 20)
+			Title.Font = Enum.Font.GothamBold
+			Title.Text = KeySettings.Title
+			Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+			Title.TextSize = 18.000
+			Title.TextXAlignment = Enum.TextXAlignment.Left
+
+			Subtitle.Name = "Subtitle"
+			Subtitle.Parent = MainFrame
+			Subtitle.BackgroundTransparency = 1.000
+			Subtitle.Position = UDim2.new(0, 20, 0, 35)
+			Subtitle.Size = UDim2.new(1, -40, 0, 15)
+			Subtitle.Font = Enum.Font.Gotham
+			Subtitle.Text = KeySettings.Subtitle
+			Subtitle.TextColor3 = Color3.fromRGB(150, 150, 150)
+			Subtitle.TextSize = 12.000
+			Subtitle.TextXAlignment = Enum.TextXAlignment.Left
+
+			Note.Name = "Note"
+			Note.Parent = MainFrame
+			Note.BackgroundTransparency = 1.000
+			Note.Position = UDim2.new(0, 20, 0, 145)
+			Note.Size = UDim2.new(1, -40, 0, 15)
+			Note.Font = Enum.Font.Gotham
+			Note.Text = KeySettings.Note
+			Note.TextColor3 = Color3.fromRGB(100, 100, 100)
+			Note.TextSize = 11.000
+			Note.TextXAlignment = Enum.TextXAlignment.Center
+
+			KeyInput.Name = "KeyInput"
+			KeyInput.Parent = MainFrame
+			KeyInput.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+			KeyInput.Position = UDim2.new(0, 20, 0, 65)
+			KeyInput.Size = UDim2.new(1, -40, 0, 35)
+			KeyInput.Font = Enum.Font.Gotham
+			KeyInput.PlaceholderText = "Enter Key..."
+			KeyInput.Text = ""
+			KeyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+			KeyInput.TextSize = 14.000
+			KeyInput.TextXAlignment = Enum.TextXAlignment.Center
+			KeyInput.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+
+			KeyInputCorner.CornerRadius = UDim.new(0, 4)
+			KeyInputCorner.Parent = KeyInput
+			
+			KeyInputStroke.Color = Color3.fromRGB(50, 50, 50)
+			KeyInputStroke.Thickness = 1
+			KeyInputStroke.Parent = KeyInput
+			
+			KeyInput.Focused:Connect(function()
+				GumballZ:CreateAnimation(KeyInputStroke, 0.2, {Color = GumballZ.Colors.Main})
+			end)
+			
+			KeyInput.FocusLost:Connect(function()
+				GumballZ:CreateAnimation(KeyInputStroke, 0.2, {Color = Color3.fromRGB(50, 50, 50)})
+			end)
+
+			CheckKeyButton.Name = "CheckKeyButton"
+			CheckKeyButton.Parent = MainFrame
+			CheckKeyButton.BackgroundColor3 = GumballZ.Colors.Main
+			CheckKeyButton.Position = UDim2.new(0, 20, 0, 110)
+			CheckKeyButton.Size = UDim2.new(0, 150, 0, 30)
+			CheckKeyButton.Font = Enum.Font.GothamBold
+			CheckKeyButton.Text = "Check Key"
+			CheckKeyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+			CheckKeyButton.TextSize = 13.000
+
+			CheckKeyCorner.CornerRadius = UDim.new(0, 4)
+			CheckKeyCorner.Parent = CheckKeyButton
+
+			GetKeyButton.Name = "GetKeyButton"
+			GetKeyButton.Parent = MainFrame
+			GetKeyButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+			GetKeyButton.Position = UDim2.new(1, -170, 0, 110)
+			GetKeyButton.Size = UDim2.new(0, 150, 0, 30)
+			GetKeyButton.Font = Enum.Font.GothamBold
+			GetKeyButton.Text = "Get Key"
+			GetKeyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+			GetKeyButton.TextSize = 13.000
+
+			GetKeyCorner.CornerRadius = UDim.new(0, 4)
+			GetKeyCorner.Parent = GetKeyButton
+			
+			local function VerifyKey()
+				local inputKey = KeyInput.Text
+				local valid = false
+				
+				if typeof(KeySettings.Key) == "table" then
+					if table.find(KeySettings.Key, inputKey) then
+						valid = true
+					end
+				elseif typeof(KeySettings.Key) == "string" then
+					if inputKey == KeySettings.Key then
+						valid = true
+					end
+				end
+				
+				if valid then
+					if KeySettings.SaveKey then
+						writefile(KeySettings.FileName..".key", inputKey)
+					end
+					
+					verified = true
+					
+					GumballZ:CreateAnimation(MainFrame, 0.5, {Size = UDim2.new(0,0,0,0), Transparency = 1})
+					task.wait(0.2)
+					KeySystemGui:Destroy()
+					
+					Gum.Notifier:Notify({
+						Title = "Key System",
+						Content = "Key Valid! Loading UI...",
+						Icon = "check",
+						Duration = 3,
+					})
+				else
+					Gum.Notifier:Notify({
+						Title = "Key System",
+						Content = "Invalid Key!",
+						Icon = "x",
+						Duration = 3,
+					})
+					KeyInput.Text = ""
+				end
+			end
+			
+			CheckKeyButton.MouseButton1Click:Connect(VerifyKey)
+			
+			GetKeyButton.MouseButton1Click:Connect(function()
+				setclipboard(KeySettings.URL or "")
+				Gum.Notifier:Notify({
+					Title = "Key System",
+					Content = "Link saved to clipboard!",
+					Icon = "link",
+					Duration = 3,
+				})
+			end)
+			
+			repeat task.wait() until verified
+		end
+	end
 
 	local GumballZwin = Instance.new("ScreenGui")
 	local GumFrame = Instance.new("Frame")
