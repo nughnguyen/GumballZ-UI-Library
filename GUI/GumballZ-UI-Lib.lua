@@ -2516,42 +2516,70 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		Camera.Parent = Viewport
 		Camera.FieldOfView = 60
 
+		-- Safe Update Model Function
 		local function UpdateModel()
-			WorldModel:ClearAllChildren()
-			local Player = game:GetService("Players").LocalPlayer
-			if Player and Player.Character then
-				Player.Character.Archivable = true
-				local ClonedChar = Player.Character:Clone()
-				ClonedChar.Parent = WorldModel
-				
-				-- Adjust Camera
-				local PrimaryPart = ClonedChar.PrimaryPart or ClonedChar:FindFirstChild("HumanoidRootPart")
-				if PrimaryPart then
-					local min, max = ClonedChar:GetModelCFrame().Position - Vector3.new(3,3,3), ClonedChar:GetModelCFrame().Position + Vector3.new(3,3,3) -- Approx size
-					local center = PrimaryPart.Position
-					Camera.CFrame = CFrame.new(center + Vector3.new(0, 0, -6), center)
+			pcall(function()
+				WorldModel:ClearAllChildren()
+				local Player = game:GetService("Players").LocalPlayer
+				if Player and Player.Character then
+					Player.Character.Archivable = true
+					local ClonedChar = Player.Character:Clone()
+					if ClonedChar then
+						ClonedChar.Parent = WorldModel
+						
+						-- Adjust Camera
+						local PrimaryPart = ClonedChar.PrimaryPart or ClonedChar:FindFirstChild("HumanoidRootPart")
+						if PrimaryPart then
+							local center = PrimaryPart.Position
+							Camera.CFrame = CFrame.new(center + Vector3.new(0, 0, -6), center)
+						end
+					end
 				end
-			end
+			end)
 		end
 
 		UpdateModel()
 		
 		-- Simple Rotation
 		local Rotation = 0
-		game:GetService("RunService").RenderStepped:Connect(function(dt)
+		local connection
+		connection = game:GetService("RunService").RenderStepped:Connect(function(dt)
+			if not Container.Parent then 
+				if connection then connection:Disconnect() end
+				return 
+			end
+			
 			if Config.DisableRotation then return end
 			Rotation = Rotation + dt * 20 -- Speed
+			
 			local Char = WorldModel:FindFirstChildOfClass("Model")
-			if Char and Char.PrimaryPart then
-				Char:SetPrimaryPartCFrame(CFrame.new(Vector3.new(0,0,0)) * CFrame.Angles(0, math.rad(Rotation), 0))
-				Camera.CFrame = CFrame.new(Vector3.new(0, 2, -6), Vector3.new(0, 2, 0))
+			if Char then
+				local pivot = Char:GetPivot()
+				-- Rotate around vertical axis
+				if Char.PrimaryPart then
+                     -- Reset to identity rotation then apply new rotation is tricky without accumulation issues?
+                     -- Easier: Just clone again or keep rotating?
+                     -- PivotTo is absolute.
+                     -- Let's construct a CFrame at 0,0,0 with rotation
+                     local newCF = CFrame.new(Vector3.zero) * CFrame.Angles(0, math.rad(Rotation), 0)
+                     Char:PivotTo(newCF)
+                     -- Point camera at 0,2,0
+                     Camera.CFrame = CFrame.new(Vector3.new(0, 2, -6), Vector3.new(0, 2, 0))
+				end
 			end
 		end)
 		
 		-- Handle Respawn
-		game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function()
+		local respawnConnection
+		respawnConnection = game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function()
 			task.wait(1)
 			UpdateModel()
+		end)
+		
+		-- Cleanup on destroy (Container removed)
+		Container.Destroying:Connect(function()
+			if connection then connection:Disconnect() end
+			if respawnConnection then respawnConnection:Disconnect() end
 		end)
 	end;
 
