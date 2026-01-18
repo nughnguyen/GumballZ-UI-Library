@@ -289,7 +289,7 @@ GumballZ.FontSemiBold = Font.new('rbxasset://fonts/families/GothamSSm.json',Enum
 GumballZ.Flags = {};
 GumballZ.Colors = {
 	Black = Color3.fromRGB(16, 16, 16),
-	Main = Color3.fromRGB(255, 106, 133)
+	Main = Color3.fromRGB(0, 255, 255)
 };
 GumballZ.DragBlacklist = {};
 GumballZ.Version = '1.6';
