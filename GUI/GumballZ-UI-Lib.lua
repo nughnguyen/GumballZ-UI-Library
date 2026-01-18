@@ -3172,6 +3172,9 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 				Button_Name.Text = new_name
 				GumballZ:ProtectText(Button_Name,new_name);
 			end,
+			SetText = function(text)
+				Button_Name.Text = text
+			end,
 			GetValue = function()
 				return Config.Default;
 			end,

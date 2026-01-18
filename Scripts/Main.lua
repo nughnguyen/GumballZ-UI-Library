@@ -325,13 +325,22 @@ do
 		end
 	})
 
-	GameInfo:AddButton({
+	local ServerSizeButton = GameInfo:AddButton({
 		Name = "Server Size: " .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers,
 		Callback = function()
 			setclipboard(#Players:GetPlayers() .. "/" .. Players.MaxPlayers)
 			Notification:Notify({Title = "Copied", Content = "Copied Server Size", Icon = "clipboard", Duration = 2})
 		end
 	})
+
+	-- Live update server size
+	task.spawn(function()
+		while task.wait(1) do
+			if ServerSizeButton and ServerSizeButton.SetText then
+				ServerSizeButton.SetText("Server Size: " .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers)
+			end
+		end
+	end)
 
 	-- Socials
 	Socials:AddDivider("OUR COMMUNITY")
