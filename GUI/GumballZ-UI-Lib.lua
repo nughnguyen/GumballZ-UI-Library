@@ -63,6 +63,7 @@ export type Elements = {
 	},
 	AddDivider: (self) -> nil,
 	AddParagraph: (self,Config: {Title: string, Content: string}) -> nil,
+	AddPlayerView: (self,Config: {Height: number}) -> nil,
 }
 
 export type Preview = {
@@ -2477,6 +2478,81 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		local ContentSize = GumballZ:GetTextSize(Content, Content.FontFace.Family, Content.TextSize, Vector2.new(Parent.AbsoluteSize.X - 45, 1000))
         Content.Size = UDim2.new(1, -20, 0, ContentSize.Y)
         Paragraph.Size = UDim2.new(1, -25, 0, ContentSize.Y + 35)
+	end;
+
+	function elements:AddPlayerView(Config)
+		Config = Config or {}
+		Config.Height = Config.Height or 200
+
+		local Container = Instance.new("Frame")
+		local Viewport = Instance.new("ViewportFrame")
+		local WorldModel = Instance.new("WorldModel")
+		local Camera = Instance.new("Camera")
+		local UICorner = Instance.new("UICorner")
+		local UIStroke = Instance.new("UIStroke")
+
+		Container.Name = GumballZ:RandomString()
+		Container.Parent = Parent
+		Container.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
+		Container.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		Container.BorderSizePixel = 0
+		Container.Size = UDim2.new(1, -25, 0, Config.Height)
+		Container.ZIndex = ZIndex + 1
+		GumballZ:AddDragBlacklist(Container)
+
+		UICorner.CornerRadius = UDim.new(0, 4)
+		UICorner.Parent = Container
+
+		UIStroke.Color = Color3.fromRGB(29, 29, 29)
+		UIStroke.Parent = Container
+
+		Viewport.Parent = Container
+		Viewport.BackgroundTransparency = 1
+		Viewport.Size = UDim2.new(1, 0, 1, 0)
+		Viewport.CurrentCamera = Camera
+		Viewport.ZIndex = ZIndex + 2
+
+		WorldModel.Parent = Viewport
+		Camera.Parent = Viewport
+		Camera.FieldOfView = 60
+
+		local function UpdateModel()
+			WorldModel:ClearAllChildren()
+			local Player = game:GetService("Players").LocalPlayer
+			if Player and Player.Character then
+				Player.Character.Archivable = true
+				local ClonedChar = Player.Character:Clone()
+				ClonedChar.Parent = WorldModel
+				
+				-- Adjust Camera
+				local PrimaryPart = ClonedChar.PrimaryPart or ClonedChar:FindFirstChild("HumanoidRootPart")
+				if PrimaryPart then
+					local min, max = ClonedChar:GetModelCFrame().Position - Vector3.new(3,3,3), ClonedChar:GetModelCFrame().Position + Vector3.new(3,3,3) -- Approx size
+					local center = PrimaryPart.Position
+					Camera.CFrame = CFrame.new(center + Vector3.new(0, 0, -6), center)
+				end
+			end
+		end
+
+		UpdateModel()
+		
+		-- Simple Rotation
+		local Rotation = 0
+		game:GetService("RunService").RenderStepped:Connect(function(dt)
+			if Config.DisableRotation then return end
+			Rotation = Rotation + dt * 20 -- Speed
+			local Char = WorldModel:FindFirstChildOfClass("Model")
+			if Char and Char.PrimaryPart then
+				Char:SetPrimaryPartCFrame(CFrame.new(Vector3.new(0,0,0)) * CFrame.Angles(0, math.rad(Rotation), 0))
+				Camera.CFrame = CFrame.new(Vector3.new(0, 2, -6), Vector3.new(0, 2, 0))
+			end
+		end)
+		
+		-- Handle Respawn
+		game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function()
+			task.wait(1)
+			UpdateModel()
+		end)
 	end;
 
 	function elements:AddToggle(Config: Toggle)

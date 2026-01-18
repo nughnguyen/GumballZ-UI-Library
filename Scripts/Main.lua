@@ -141,7 +141,6 @@ do
 	})
 
 	-- Visual Settings
-	General:AddDivider("Visuals")
 
 	General:AddSlider({
 		Name = "FOV",
@@ -304,6 +303,8 @@ do
 		end
 	})
 
+	UserInfo:AddPlayerView({ Height = 195 })
+
 	-- Game Name
 	local success, gameInfo = pcall(function()
 		return MarketplaceService:GetProductInfo(game.PlaceId)
@@ -327,6 +328,12 @@ do
 	})
 
 	-- Socials
+	
+	Socials:AddParagraph({
+		Title = "Join Us!",
+		Content = "Follow our official channels for the latest updates, giveaways, and community support."
+	})
+
 	Socials:AddButton({
 		Name = "Discord Server",
 		Callback = function()
