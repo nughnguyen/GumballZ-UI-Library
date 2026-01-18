@@ -4182,6 +4182,7 @@ function GumballZ.new(Window: Window)
 	local InfoButton = Instance.new("ImageButton")
 	local SearchButton = Instance.new("ImageButton")
 	local SaveButton = Instance.new("ImageButton")
+	local CloseButton = Instance.new("ImageButton")
 
 	GumballZ.WindowFlags[GumballZwin] = {};
 
@@ -4248,6 +4249,10 @@ function GumballZ.new(Window: Window)
 				ImageTransparency = 0.5
 			})
 
+			GumballZ:CreateAnimation(CloseButton,0.25,{
+				ImageTransparency = 0.5
+			})
+
 			GumballZ:CreateAnimation(HeaderText,0.35,{
 				TextStrokeTransparency = 0.640,
 				TextTransparency = 0
@@ -4283,6 +4288,10 @@ function GumballZ.new(Window: Window)
 
 			GumballZ:CreateAnimation(SaveButton,0.1,Enum.EasingStyle.Back,{
 				Position = UDim2.new(0,35,0.5, 0)
+			})
+
+			GumballZ:CreateAnimation(CloseButton,0.25,{
+				ImageTransparency = 0.5
 			})
 
 			GumballZ:CreateAnimation(DropShadow,0.35,{
@@ -4345,6 +4354,10 @@ function GumballZ.new(Window: Window)
 			})
 
 			GumballZ:CreateAnimation(SaveButton,0.35,{
+				ImageTransparency = 1
+			})
+
+			GumballZ:CreateAnimation(CloseButton,0.35,{
 				ImageTransparency = 1
 			})
 
@@ -4496,7 +4509,7 @@ function GumballZ.new(Window: Window)
 	UserProfle.BackgroundTransparency = 1.000
 	UserProfle.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	UserProfle.BorderSizePixel = 0
-	UserProfle.Position = UDim2.new(1, -5, 0.5, 0)
+	UserProfle.Position = UDim2.new(1, -40, 0.5, 0)
 	UserProfle.Size = UDim2.new(0, 150, 0.75, 0)
 	UserProfle.ZIndex = 4
 
@@ -4554,6 +4567,37 @@ function GumballZ.new(Window: Window)
 	expire_days.TextStrokeTransparency = 0.700
 	expire_days.TextXAlignment = Enum.TextXAlignment.Right
 	expire_days.RichText = true;
+
+	CloseButton.Name = GumballZ:RandomString()
+	CloseButton.Parent = Header
+	CloseButton.AnchorPoint = Vector2.new(1, 0.5)
+	CloseButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	CloseButton.BackgroundTransparency = 1.000
+	CloseButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	CloseButton.BorderSizePixel = 0
+	CloseButton.Position = UDim2.new(1, -5, 0.5, 0)
+	CloseButton.Size = UDim2.new(0, 20, 0, 20)
+	CloseButton.ZIndex = 4
+	CloseButton.Image = GumballZ:GetIcon("log-out")
+	CloseButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
+	CloseButton.ImageTransparency = 0.5
+
+	CloseButton.MouseEnter:Connect(function()
+		GumballZ:CreateAnimation(CloseButton,0.25,{
+			ImageTransparency = 0.2
+		})
+	end)
+
+	CloseButton.MouseLeave:Connect(function()
+		GumballZ:CreateAnimation(CloseButton,0.25,{
+			ImageTransparency = 0.5
+		})
+	end)
+
+	CloseButton.MouseButton1Click:Connect(function()
+		Gum.Toggle = false;
+		ToggleUI(false);
+	end)
 
 	HeaderLineShadow.Name = GumballZ:RandomString()
 	HeaderLineShadow.Parent = Header
