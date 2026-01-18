@@ -1,23 +1,24 @@
+--[[ 
+    IMPORTANT: We load the library from the local file 'GUI/GumballZ-UI-Lib.lua' 
+    because it contains the new 'AddDivider' and 'AddParagraph' features 
+    that are NOT yet on the public GitHub. 
+]]
 local function GetFileContent(path)
-	if readfile then
-		return readfile(path)
-	end
-	if getgenv and getgenv().readfile then
-		return getgenv().readfile(path)
-	end
+	if readfile then return readfile(path) end
+	if getgenv and getgenv().readfile then return getgenv().readfile(path) end
 	return nil
 end
 
 local LibraryContent = pcall(function() return GetFileContent("GUI/GumballZ-UI-Lib.lua") end) and GetFileContent("GUI/GumballZ-UI-Lib.lua")
-
 local GumballZ
+
 if LibraryContent then
 	GumballZ = loadstring(LibraryContent)()
 else
-	warn("Could not find local library file, loading from web (Edits will not appear)")
+    -- Fallback for safety, but new features won't work
+	warn("⚠️ CRITICAL: Could not find local file 'GUI/GumballZ-UI-Lib.lua'. Divider/Paragraph will BREAK.")
 	GumballZ = loadstring(game:HttpGet("https://raw.githubusercontent.com/nughnguyen/GumballZ-UI-Library/refs/heads/main/GUI/GumballZ-UI-Lib.lua"))();
 end
-
 local Notification = GumballZ:CreateNotifier();
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer

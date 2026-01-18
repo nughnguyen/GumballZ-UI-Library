@@ -6323,7 +6323,7 @@ function GumballZ.new(Window: Window)
 			SectionName.TextXAlignment = Enum.TextXAlignment.Left
 
 
-			UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(function()
+			local function UpdateSize()
 				local MainScale = UIListLayout.AbsoluteContentSize.Y + 20 + Config.Height;
 
 				if not Menu.AutoFill then
@@ -6333,7 +6333,12 @@ function GumballZ.new(Window: Window)
 				else
 					Section.Size = UDim2.new(1,0,0,MainScale / 2.5);
 				end;
-			end);
+			end;
+
+			UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(UpdateSize);
+			
+			-- Force update to ensure height is correct for all static elements
+			task.delay(0.1, UpdateSize)
 
 			Toggle(BindEvent:GetAttribute('V'));
 
