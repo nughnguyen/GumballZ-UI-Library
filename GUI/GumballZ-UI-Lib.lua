@@ -2636,6 +2636,11 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		UICorner.CornerRadius = UDim.new(0, 2)
 		UICorner.Parent = ValueFrame
 
+		local UIStroke = Instance.new("UIStroke")
+		UIStroke.Color = GumballZ.Colors.Main
+		UIStroke.Thickness = 1
+		UIStroke.Parent = ValueFrame
+
 		OptionButton.Name = GumballZ:RandomString()
 		OptionButton.Parent = ValueFrame
 		OptionButton.AnchorPoint = Vector2.new(0, 0.5)
