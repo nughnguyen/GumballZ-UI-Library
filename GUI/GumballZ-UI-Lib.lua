@@ -4183,6 +4183,7 @@ function GumballZ.new(Window: Window)
 	local SearchButton = Instance.new("ImageButton")
 	local SaveButton = Instance.new("ImageButton")
 	local CloseButton = Instance.new("ImageButton")
+	local MinimizeButton = Instance.new("ImageButton")
 
 	GumballZ.WindowFlags[GumballZwin] = {};
 
@@ -4253,6 +4254,10 @@ function GumballZ.new(Window: Window)
 				ImageTransparency = 0.5
 			})
 
+			GumballZ:CreateAnimation(MinimizeButton,0.25,{
+				ImageTransparency = 0.5
+			})
+
 			GumballZ:CreateAnimation(HeaderText,0.35,{
 				TextStrokeTransparency = 0.640,
 				TextTransparency = 0
@@ -4291,6 +4296,10 @@ function GumballZ.new(Window: Window)
 			})
 
 			GumballZ:CreateAnimation(CloseButton,0.25,{
+				ImageTransparency = 0.5
+			})
+
+			GumballZ:CreateAnimation(MinimizeButton,0.25,{
 				ImageTransparency = 0.5
 			})
 
@@ -4358,6 +4367,10 @@ function GumballZ.new(Window: Window)
 			})
 
 			GumballZ:CreateAnimation(CloseButton,0.35,{
+				ImageTransparency = 1
+			})
+
+			GumballZ:CreateAnimation(MinimizeButton,0.35,{
 				ImageTransparency = 1
 			})
 
@@ -4595,8 +4608,146 @@ function GumballZ.new(Window: Window)
 	end)
 
 	CloseButton.MouseButton1Click:Connect(function()
-		Gum.Toggle = false;
-		ToggleUI(false);
+		local ConfirmFrame = Instance.new("Frame")
+		local UICorner = Instance.new("UICorner")
+		local UIStroke = Instance.new("UIStroke")
+		local ConfirmText = Instance.new("TextLabel")
+		local YesButton = Instance.new("TextButton")
+		local NoButton = Instance.new("TextButton")
+		local YesCorner = Instance.new("UICorner")
+		local NoCorner = Instance.new("UICorner")
+
+		ConfirmFrame.Name = "ConfirmFrame"
+		ConfirmFrame.Parent = GumballZwin
+		ConfirmFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+		ConfirmFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+		ConfirmFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+		ConfirmFrame.Size = UDim2.new(0, 0, 0, 0) -- Start small
+		ConfirmFrame.Transparency = 1
+		ConfirmFrame.ZIndex = 110
+
+		UICorner.CornerRadius = UDim.new(0, 6)
+		UICorner.Parent = ConfirmFrame
+
+		UIStroke.Color = Color3.fromRGB(40, 40, 40)
+		UIStroke.Parent = ConfirmFrame
+
+		ConfirmText.Parent = ConfirmFrame
+		ConfirmText.BackgroundTransparency = 1
+		ConfirmText.Position = UDim2.new(0.5, 0, 0.2, 0)
+		ConfirmText.Size = UDim2.new(1, 0, 0.3, 0)
+		ConfirmText.AnchorPoint = Vector2.new(0.5,0)
+		ConfirmText.Font = Enum.Font.GothamBold
+		ConfirmText.Text = "close menu?"
+		ConfirmText.TextColor3 = Color3.fromRGB(255, 255, 255)
+		ConfirmText.TextSize = 16
+		ConfirmText.TextTransparency = 1
+		ConfirmText.ZIndex = 111
+
+		YesButton.Parent = ConfirmFrame
+		YesButton.BackgroundColor3 = GumballZ.Colors.Main
+		YesButton.Position = UDim2.new(0.1, 0, 0.6, 0)
+		YesButton.Size = UDim2.new(0.35, 0, 0.3, 0)
+		YesButton.Font = Enum.Font.GothamMedium
+		YesButton.Text = "yes"
+		YesButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		YesButton.TextSize = 14
+		YesButton.BackgroundTransparency = 1
+		YesButton.TextTransparency = 1
+		YesButton.ZIndex = 111
+
+		YesCorner.CornerRadius = UDim.new(0, 4)
+		YesCorner.Parent = YesButton
+
+		NoButton.Parent = ConfirmFrame
+		NoButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+		NoButton.Position = UDim2.new(0.55, 0, 0.6, 0)
+		NoButton.Size = UDim2.new(0.35, 0, 0.3, 0)
+		NoButton.Font = Enum.Font.GothamMedium
+		NoButton.Text = "no"
+		NoButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		NoButton.TextSize = 14
+		NoButton.BackgroundTransparency = 1
+		NoButton.TextTransparency = 1
+		NoButton.ZIndex = 111
+
+		NoCorner.CornerRadius = UDim.new(0, 4)
+		NoCorner.Parent = NoButton
+
+		-- Animation In
+		GumballZ:CreateAnimation(ConfirmFrame, 0.3, Enum.EasingStyle.Back, {
+			Size = UDim2.new(0, 200, 0, 100),
+			Transparency = 0
+		})
+		
+		task.wait(0.1)
+		GumballZ:CreateAnimation(ConfirmText, 0.3, {TextTransparency = 0})
+		GumballZ:CreateAnimation(YesButton, 0.3, {BackgroundTransparency = 0, TextTransparency = 0})
+		GumballZ:CreateAnimation(NoButton, 0.3, {BackgroundTransparency = 0, TextTransparency = 0})
+
+		YesButton.MouseButton1Click:Connect(function()
+			GumballZwin:Destroy()
+		end)
+
+		NoButton.MouseButton1Click:Connect(function()
+			-- Animation Out
+			GumballZ:CreateAnimation(ConfirmText, 0.2, {TextTransparency = 1})
+			GumballZ:CreateAnimation(YesButton, 0.2, {BackgroundTransparency = 1, TextTransparency = 1})
+			GumballZ:CreateAnimation(NoButton, 0.2, {BackgroundTransparency = 1, TextTransparency = 1})
+			GumballZ:CreateAnimation(ConfirmFrame, 0.3, Enum.EasingStyle.Quad, {
+				Size = UDim2.new(0, 0, 0, 0),
+				Transparency = 1
+			})
+			task.wait(0.3)
+			ConfirmFrame:Destroy()
+		end)
+	end)
+
+	MinimizeButton.Name = GumballZ:RandomString()
+	MinimizeButton.Parent = Header
+	MinimizeButton.AnchorPoint = Vector2.new(1, 0.5)
+	MinimizeButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	MinimizeButton.BackgroundTransparency = 1.000
+	MinimizeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+	MinimizeButton.BorderSizePixel = 0
+	MinimizeButton.Position = UDim2.new(1, -30, 0.5, 0)
+	MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
+	MinimizeButton.ZIndex = 4
+	MinimizeButton.Image = GumballZ:GetIcon("minus")
+	MinimizeButton.ImageColor3 = Color3.fromRGB(255, 255, 255)
+	MinimizeButton.ImageTransparency = 0.5
+
+	MinimizeButton.MouseEnter:Connect(function()
+		GumballZ:CreateAnimation(MinimizeButton,0.25,{
+			ImageTransparency = 0.2
+		})
+	end)
+
+	MinimizeButton.MouseLeave:Connect(function()
+		GumballZ:CreateAnimation(MinimizeButton,0.25,{
+			ImageTransparency = 0.5
+		})
+	end)
+	
+	local isMinimized = false
+	MinimizeButton.MouseButton1Click:Connect(function()
+		isMinimized = not isMinimized
+		if isMinimized then
+			GumballZ:CreateAnimation(GumFrame, 0.5, Enum.EasingStyle.Quart, {
+				Size = UDim2.new(0, Window.Scale.X.Offset, 0, 50)
+			})
+			MenuFrame.Visible = false
+			Bottom.Visible = false
+			-- UserProfle.Visible = false -- Optionally hide this if you want
+		else
+			GumballZ:CreateAnimation(GumFrame, 0.5, Enum.EasingStyle.Quart, {
+				Size = Window.Scale
+			})
+			task.wait(0.2)
+			MenuFrame.Visible = true
+			Bottom.Visible = true
+			-- UserProfle.Visible = true
+		end
 	end)
 
 	HeaderLineShadow.Name = GumballZ:RandomString()
