@@ -4670,7 +4670,7 @@ function GumballZ.new(Window: Window)
 	Header.BackgroundColor3 = Color3.fromRGB(21, 21, 21)
 	Header.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	Header.BorderSizePixel = 0
-	Header.Size = UDim2.new(1, 0, 0, 40)
+	Header.Size = UDim2.new(1, 0, 0, 85)
 	Header.ZIndex = 2
 
 	HeaderLine.Name = GumballZ:RandomString()
@@ -4693,8 +4693,8 @@ function GumballZ.new(Window: Window)
 	HeaderText.BackgroundTransparency = 1.000
 	HeaderText.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	HeaderText.BorderSizePixel = 0
-	HeaderText.Position = UDim2.new(0, 5, 0.5, 0)
-	HeaderText.Size = UDim2.new(0, 100, 0.699999988, 0)
+	HeaderText.Position = UDim2.new(0, 15, 0, 22)
+	HeaderText.Size = UDim2.new(0, 100, 0, 20)
 	HeaderText.ZIndex = 4
 	HeaderText.Font = Enum.Font.GothamBold
 	HeaderText.Text = Window.Name
@@ -4705,14 +4705,14 @@ function GumballZ.new(Window: Window)
 
 	MenuButtonCont.Name = GumballZ:RandomString()
 	MenuButtonCont.Parent = Header
-	MenuButtonCont.AnchorPoint = Vector2.new(0, 0.5)
+	MenuButtonCont.AnchorPoint = Vector2.new(0, 0)
 	MenuButtonCont.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	MenuButtonCont.BackgroundTransparency = 1.000
 	MenuButtonCont.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	MenuButtonCont.BorderSizePixel = 0
 	MenuButtonCont.ClipsDescendants = true
-	MenuButtonCont.Position = UDim2.new(0, 115, 0.5, 0)
-	MenuButtonCont.Size = UDim2.new(1, -275, 0.75, 0)
+	MenuButtonCont.Position = UDim2.new(0, 10, 0, 48)
+	MenuButtonCont.Size = UDim2.new(1, -20, 0, 35)
 	MenuButtonCont.ZIndex = 4
 
 	tbc.Name = GumballZ:RandomString()
@@ -4743,8 +4743,8 @@ function GumballZ.new(Window: Window)
 	UserProfle.BackgroundTransparency = 1.000
 	UserProfle.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	UserProfle.BorderSizePixel = 0
-	UserProfle.Position = UDim2.new(1, -40, 0.5, 0)
-	UserProfle.Size = UDim2.new(0, 150, 0.75, 0)
+	UserProfle.Position = UDim2.new(1, -80, 0, 22)
+	UserProfle.Size = UDim2.new(0, 150, 0, 40)
 	UserProfle.ZIndex = 4
 
 	UserIcon.Name = GumballZ:RandomString()
@@ -4809,7 +4809,7 @@ function GumballZ.new(Window: Window)
 	CloseButton.BackgroundTransparency = 1.000
 	CloseButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	CloseButton.BorderSizePixel = 0
-	CloseButton.Position = UDim2.new(1, -5, 0.5, 0)
+	CloseButton.Position = UDim2.new(1, -10, 0, 22)
 	CloseButton.Size = UDim2.new(0, 20, 0, 20)
 	CloseButton.ZIndex = 4
 	CloseButton.Image = GumballZ:GetIcon("log-out")
@@ -4931,7 +4931,7 @@ function GumballZ.new(Window: Window)
 	MinimizeButton.BackgroundTransparency = 1.000
 	MinimizeButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	MinimizeButton.BorderSizePixel = 0
-	MinimizeButton.Position = UDim2.new(1, -30, 0.5, 0)
+	MinimizeButton.Position = UDim2.new(1, -40, 0, 22)
 	MinimizeButton.Size = UDim2.new(0, 20, 0, 20)
 	MinimizeButton.ZIndex = 4
 	MinimizeButton.Image = GumballZ:GetIcon("minus")
@@ -4955,7 +4955,7 @@ function GumballZ.new(Window: Window)
 		isMinimized = not isMinimized
 		if isMinimized then
 			GumballZ:CreateAnimation(GumFrame, 0.5, Enum.EasingStyle.Quart, {
-				Size = UDim2.new(0, Window.Scale.X.Offset, 0, 50)
+				Size = UDim2.new(0, Window.Scale.X.Offset, 0, 85)
 			})
 			MenuFrame.Visible = false
 			Bottom.Visible = false
@@ -4991,8 +4991,8 @@ function GumballZ.new(Window: Window)
 	MenuFrame.BackgroundTransparency = 1.000
 	MenuFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	MenuFrame.BorderSizePixel = 0
-	MenuFrame.Position = UDim2.new(0, 0, 0, 50)
-	MenuFrame.Size = UDim2.new(1, 0, 1, -82)
+	MenuFrame.Position = UDim2.new(0, 0, 0, 90)
+	MenuFrame.Size = UDim2.new(1, 0, 1, -120)
 
 	Bottom.Name = GumballZ:RandomString()
 	Bottom.Parent = GumFrame
