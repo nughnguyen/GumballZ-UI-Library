@@ -65,51 +65,85 @@ do
 
 	local General = Home:AddSection({
 		Position = 'left',
-		Name = "GENERAL"
-	});
-	
-	General:AddToggle({ Name = "Aimbot", Risky = true })
-	General:AddToggle({ Name = "Slient aim", Risky = false })
-	General:AddSlider({ Name = "Maximum fov", Type = " deg", Default = 0 })
-	General:AddToggle({ Name = "Autofire", Risky = false })
-	General:AddToggle({ Name = "Delay shot", Risky = false })
-	General:AddToggle({ Name = "Duck peek assist", Risky = false })
-	General:AddToggle({ Name = "Force bodyaim", Risky = false })
-	General:AddToggle({ Name = "Force shoot", Risky = false })
-	General:AddToggle({ Name = "Headshot only", Risky = false })
-	General:AddToggle({ Name = "Knife bot", Risky = false })
-	General:AddToggle({ Name = "Zeus bot", Risky = false })
+		Name = "GENERAL",
+		Height = 5 -- Give it a bit more initial height
+	})
 
-	local NoSpread = General:AddToggle({
-		Name = "Nospread",
-		Risky = false,
-		Option = true
+	-- Movement Settings
+	General:AddSlider({
+		Name = "WalkSpeed",
+		Default = 16,
+		Min = 16,
+		Max = 250,
+		Callback = function(v)
+			if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+				LocalPlayer.Character.Humanoid.WalkSpeed = v
+			end
+		end
 	})
-	NoSpread.Option:AddToggle({ Name = "Something" })
-	NoSpread.Option:AddToggle({ Name = "Something" })
-	NoSpread.Option:AddToggle({ Name = "Something" })
-	NoSpread.Option:AddToggle({ Name = "Something" })
-	
-	local Doubletap = General:AddToggle({
-		Name = "Doubletap",
-		Risky = true,
-		Option = true
+
+	General:AddSlider({
+		Name = "JumpPower",
+		Default = 50,
+		Min = 50,
+		Max = 350,
+		Callback = function(v)
+			if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+				LocalPlayer.Character.Humanoid.UseJumpPower = true
+				LocalPlayer.Character.Humanoid.JumpPower = v
+			end
+		end
 	})
-	Doubletap.Option:AddToggle({ Name = "Something" })
-	Doubletap.Option:AddToggle({ Name = "Something" })
-	Doubletap.Option:AddToggle({ Name = "Something" })
-	Doubletap.Option:AddToggle({ Name = "Something" })
+
+	General:AddSlider({
+		Name = "Gravity",
+		Default = 196.2,
+		Min = 0,
+		Max = 200,
+		Callback = function(v)
+			workspace.Gravity = v
+		end
+	})
 	
+	local InfiniteJumpEnabled = false
+	game:GetService("UserInputService").JumpRequest:Connect(function()
+		if InfiniteJumpEnabled and LocalPlayer.Character then
+			LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+		end
+	end)
+
+	General:AddToggle({
+		Name = "Infinite Jump",
+		Default = false,
+		Callback = function(v)
+			InfiniteJumpEnabled = v
+		end
+	})
+
+	-- Visual Settings
+	General:AddDivider("Visuals")
+
+	General:AddSlider({
+		Name = "FOV",
+		Default = 70,
+		Min = 70,
+		Max = 120,
+		Callback = function(v)
+			workspace.CurrentCamera.FieldOfView = v
+		end
+	})
+
 	General:AddButton({
-		Name = "Notification",
+		Name = "Reset Defaults",
 		Callback = function()
-			Notification:Notify({
-				Title = "Notification",
-				Content = "Testing Notification",
-				Duration = math.random(3,7),
-				Icon = "info"
-			})
-		end,
+			if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+				LocalPlayer.Character.Humanoid.WalkSpeed = 16
+				LocalPlayer.Character.Humanoid.JumpPower = 50
+			end
+			workspace.Gravity = 196.2
+			workspace.CurrentCamera.FieldOfView = 70
+			Notification:Notify({Title = "Home", Content = "Stats Reset!", Duration = 2})
+		end
 	})
 end
 
@@ -285,7 +319,7 @@ do
 	Socials:AddButton({
 		Name = "YouTube Channel",
 		Callback = function()
-			local link = "https://youtube.com/@nughnguyen" -- UPDATE THIS
+			local link = "https://youtube.com/@nughnguyen" 
 			OpenUrl(link)
 			Notification:Notify({Title = "GumballZ", Content = "Opening YouTube...", Icon = "globe", Duration = 2})
 		end
@@ -294,7 +328,7 @@ do
 	Socials:AddButton({
 		Name = "Facebook Admin",
 		Callback = function()
-			local link = "https://facebook.com/hungnq188.2k5" -- UPDATE THIS
+			local link = "https://facebook.com/hungnq188.2k5" 
 			OpenUrl(link)
 			Notification:Notify({Title = "GumballZ", Content = "Opening Facebook...", Icon = "globe", Duration = 2})
 		end

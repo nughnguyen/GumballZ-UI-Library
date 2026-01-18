@@ -61,6 +61,8 @@ export type Elements = {
 	AddKeybind: (self,Config: Keybind) -> {
 		Option: Elements	
 	},
+	AddDivider: (self) -> nil,
+	AddParagraph: (self,Config: {Title: string, Content: string}) -> nil,
 }
 
 export type Preview = {
@@ -2351,6 +2353,131 @@ end;
 function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : BindableEvent,SearchAPI: {Path: string,Memory : (name:string) -> any}) : Elements
 	local elements = {};
 	local GumballZWindow = GumballZ:GetWindowFromElement(Parent);
+
+	function elements:AddDivider(Config)
+		Config = Config or {}
+		if type(Config) == "string" then
+			Config = {Text = Config}
+		end
+
+		if Config.Text then
+			local Container = Instance.new("Frame")
+			local Line = Instance.new("Frame")
+			local Label = Instance.new("TextLabel")
+
+			Container.Name = GumballZ:RandomString()
+			Container.Parent = Parent
+			Container.BackgroundTransparency = 1
+			Container.Size = UDim2.new(1, -25, 0, 20)
+			Container.ZIndex = ZIndex + 1
+			GumballZ:AddDragBlacklist(Container)
+
+			Line.Name = GumballZ:RandomString()
+			Line.Parent = Container
+			Line.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+			Line.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Line.BorderSizePixel = 0
+			Line.Size = UDim2.new(1, 0, 0, 1)
+			Line.Position = UDim2.new(0, 0, 0.5, 0)
+			Line.ZIndex = ZIndex + 1
+
+			Label.Name = GumballZ:RandomString()
+			Label.Parent = Container
+			Label.Text = Config.Text
+			Label.FontFace = GumballZ.FontSemiBold
+			Label.TextSize = 12
+			Label.TextColor3 = Color3.fromRGB(200, 200, 200)
+			Label.BackgroundColor3 = Color3.fromRGB(24, 24, 24) -- Match typical section bg
+			Label.BorderSizePixel = 0
+			Label.AnchorPoint = Vector2.new(0.5, 0.5)
+			Label.Position = UDim2.new(0.5, 0, 0.5, 0)
+			Label.ZIndex = ZIndex + 2
+			
+			local TextSize = GumballZ:GetTextSize(Label, Label.FontFace.Family, Label.TextSize)
+			Label.Size = UDim2.new(0, TextSize.X + 8, 1, 0)
+		else
+			local Divider = Instance.new("Frame")
+			
+			Divider.Name = GumballZ:RandomString()
+			Divider.Parent = Parent
+			Divider.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+			Divider.BorderColor3 = Color3.fromRGB(0, 0, 0)
+			Divider.BorderSizePixel = 0
+			Divider.Size = UDim2.new(1, -25, 0, 1)
+			Divider.ZIndex = ZIndex + 1
+			GumballZ:AddDragBlacklist(Divider);
+		end
+	end;
+
+	function elements:AddParagraph(Config)
+		Config = Config or {}
+		Config.Title = Config.Title or "Title"
+		Config.Content = Config.Content or "Content"
+
+		local Paragraph = Instance.new("Frame")
+		local UIStroke = Instance.new("UIStroke")
+		local UICorner = Instance.new("UICorner")
+		local Title = Instance.new("TextLabel")
+		local Content = Instance.new("TextLabel")
+
+		Paragraph.Name = GumballZ:RandomString()
+		Paragraph.Parent = Parent
+		Paragraph.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
+		Paragraph.BackgroundTransparency = 1
+		Paragraph.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		Paragraph.BorderSizePixel = 0
+		Paragraph.Size = UDim2.new(1, -25, 0, 0) -- Height calculated below
+		Paragraph.ZIndex = ZIndex + 1
+		GumballZ:AddDragBlacklist(Paragraph)
+
+		-- Container for visual style (optional, maybe just text?) 
+		-- Based on typical UI lib style, paragraphs are usually inside a styled box or just text.
+		-- Let's make it look like a section item (dark bg).
+		
+        -- Actually, looking at AddToggle, items have transparent bg usually unless interacted? 
+        -- Let's give it a subtle background.
+        Paragraph.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
+        Paragraph.BackgroundTransparency = 0 -- Opaque block
+        
+        UICorner.CornerRadius = UDim.new(0, 2)
+        UICorner.Parent = Paragraph
+
+        UIStroke.Color = Color3.fromRGB(29, 29, 29)
+        UIStroke.Parent = Paragraph
+
+		Title.Name = GumballZ:RandomString()
+		Title.Parent = Paragraph
+		Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Title.BackgroundTransparency = 1.000
+		Title.Position = UDim2.new(0, 10, 0, 5)
+		Title.Size = UDim2.new(1, -20, 0, 15)
+		Title.ZIndex = ZIndex + 2
+		Title.FontFace = GumballZ.FontSemiBold
+		Title.Text = Config.Title
+		Title.TextColor3 = GumballZ.Colors.Main
+		Title.TextSize = 13.000
+		Title.TextXAlignment = Enum.TextXAlignment.Left
+
+		Content.Name = GumballZ:RandomString()
+		Content.Parent = Paragraph
+		Content.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		Content.BackgroundTransparency = 1.000
+		Content.Position = UDim2.new(0, 10, 0, 25)
+		Content.Size = UDim2.new(1, -20, 0, 0) -- Height calc
+		Content.ZIndex = ZIndex + 2
+		Content.FontFace = Font.new('rbxasset://fonts/families/GothamSSm.json', Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+		Content.Text = Config.Content
+		Content.TextColor3 = Color3.fromRGB(200, 200, 200)
+		Content.TextSize = 12.000
+		Content.TextWrapped = true
+		Content.TextXAlignment = Enum.TextXAlignment.Left
+		Content.TextYAlignment = Enum.TextYAlignment.Top
+
+		-- Calculate Height
+		local ContentSize = GumballZ:GetTextSize(Content, Content.FontFace.Family, Content.TextSize, Vector2.new(Parent.AbsoluteSize.X - 45, 1000))
+        Content.Size = UDim2.new(1, -20, 0, ContentSize.Y)
+        Paragraph.Size = UDim2.new(1, -25, 0, ContentSize.Y + 35)
+	end;
 
 	function elements:AddToggle(Config: Toggle)
 		Config = Config or {};
