@@ -2394,7 +2394,7 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 			Label.Position = UDim2.new(0.5, 0, 0.5, 0)
 			Label.ZIndex = ZIndex + 2
 			
-			local TextSize = GumballZ:GetTextSize(Label, Label.FontFace.Family, Label.TextSize)
+			local TextSize = game:GetService("TextService"):GetTextSize(Label.Text, Label.TextSize, Enum.Font.GothamSemibold, Vector2.new(1000, 100))
 			Label.Size = UDim2.new(0, TextSize.X + 8, 1, 0)
 		else
 			local Divider = Instance.new("Frame")
@@ -2470,7 +2470,7 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		if parentWidth < 50 then parentWidth = 300 end -- Fallback width if not rendered yet
 		local limitX = parentWidth - 45
 		
-		local ContentSize = GumballZ:GetTextSize(Content, Content.FontFace.Family, Content.TextSize, Vector2.new(limitX, 1000))
+		local ContentSize = game:GetService("TextService"):GetTextSize(Content.Text, Content.TextSize, Enum.Font.GothamMedium, Vector2.new(limitX, 10000))
         Content.Size = UDim2.new(1, -20, 0, ContentSize.Y)
         Paragraph.Size = UDim2.new(1, -25, 0, ContentSize.Y + 35)
 	end;
@@ -2538,8 +2538,8 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 						local PrimaryPart = ClonedChar.PrimaryPart or ClonedChar:FindFirstChild("HumanoidRootPart")
 						if PrimaryPart then
 							ClonedChar.PrimaryPart = PrimaryPart
-							-- Center model at 0, -2, 0 roughly
-							ClonedChar:PivotTo(CFrame.new(Vector3.new(0, -2, 0)) * CFrame.Angles(0, math.rad(Rotation), 0))
+							-- Center model at 0, -1, 0 (Raised up to be more central)
+							ClonedChar:PivotTo(CFrame.new(Vector3.new(0, -1, 0)) * CFrame.Angles(0, math.rad(Rotation), 0))
 						end
 					end
 				end
@@ -2547,7 +2547,7 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		end
 		
 		-- Position camera further back for full body
-		Camera.CFrame = CFrame.new(Vector3.new(0, 0, -16), Vector3.new(0, 0, 0))
+		Camera.CFrame = CFrame.new(Vector3.new(0, 0, -15.5), Vector3.new(0, 0, 0))
 
 		UpdateModel()
 
@@ -2594,8 +2594,8 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 			-- Apply Rotation
 			local Char = WorldModel:FindFirstChildOfClass("Model")
 			if Char then
-				-- We pivot the character at 0,-2,0 (approx center height)
-				Char:PivotTo(CFrame.new(Vector3.new(0, -2, 0)) * CFrame.Angles(0, math.rad(Rotation), 0))
+				-- We pivot the character at 0,-1,0 (Raised up)
+				Char:PivotTo(CFrame.new(Vector3.new(0, -1, 0)) * CFrame.Angles(0, math.rad(Rotation), 0))
 			end
 		end)
 

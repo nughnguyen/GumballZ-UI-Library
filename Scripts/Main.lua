@@ -303,7 +303,7 @@ do
 		end
 	})
 
-	UserInfo:AddPlayerView({ Height = 250 })
+	UserInfo:AddPlayerView({ Height = 285 })
 
 	-- Game Name
 	local success, gameInfo = pcall(function()
