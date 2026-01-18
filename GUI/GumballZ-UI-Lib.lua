@@ -7013,16 +7013,17 @@ function GumballZ:CreateNotifier(): Notifier
 
 	layout.Name = GumballZ:RandomString();
 	layout.Parent = Notify
-	layout.AnchorPoint = Vector2.new(1, 0)
+	layout.AnchorPoint = Vector2.new(1, 1)
 	layout.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 	layout.BackgroundTransparency = 1.000
 	layout.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	layout.BorderSizePixel = 0
-	layout.Position = UDim2.new(1, -5, 0, 5)
-	layout.Size = UDim2.new(0, 150, 0, 50)
+	layout.Position = UDim2.new(1, -5, 1, -5)
+	layout.Size = UDim2.new(0, 150, 1, -10)
 
 	UIListLayout.Parent = layout
 	UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
 	UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
 	local res = GumballZ:CreateResponse({
