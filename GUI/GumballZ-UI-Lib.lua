@@ -2415,6 +2415,11 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		UICorner.CornerRadius = UDim.new(0, 2)
 		UICorner.Parent = ValueFrame
 
+		local UIStroke = Instance.new("UIStroke")
+		UIStroke.Color = GumballZ.Colors.Main
+		UIStroke.Thickness = 1
+		UIStroke.Parent = ValueFrame
+
 		ValueIcon.Name = GumballZ:RandomString()
 		ValueIcon.Parent = ValueFrame
 		ValueIcon.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -3143,6 +3148,11 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		UICorner.CornerRadius = UDim.new(0, 2)
 		UICorner.Parent = ValueFrame
+
+		local UIStroke = Instance.new("UIStroke")
+		UIStroke.Color = GumballZ.Colors.Main
+		UIStroke.Thickness = 1
+		UIStroke.Parent = ValueFrame
 
 		OptionButton.Name = GumballZ:RandomString()
 		OptionButton.Parent = ValueFrame
