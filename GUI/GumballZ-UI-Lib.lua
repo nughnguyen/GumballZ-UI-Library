@@ -2482,7 +2482,7 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 	function elements:AddPlayerView(Config)
 		Config = Config or {}
-		Config.Height = Config.Height or 200
+		Config.Height = Config.Height or 250
 
 		local Container = Instance.new("Frame")
 		local Viewport = Instance.new("ViewportFrame")
@@ -2490,6 +2490,7 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		local Camera = Instance.new("Camera")
 		local UICorner = Instance.new("UICorner")
 		local UIStroke = Instance.new("UIStroke")
+		local InputArea = Instance.new("TextButton") -- Invisible button for input
 
 		Container.Name = GumballZ:RandomString()
 		Container.Parent = Parent
@@ -2505,16 +2506,29 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		UIStroke.Color = Color3.fromRGB(29, 29, 29)
 		UIStroke.Parent = Container
+		
+		-- Use a button for easier input handling
+		InputArea.Parent = Container
+		InputArea.Size = UDim2.new(1,0,1,0)
+		InputArea.BackgroundTransparency = 1
+		InputArea.Text = ""
+		InputArea.ZIndex = ZIndex + 10
 
 		Viewport.Parent = Container
 		Viewport.BackgroundTransparency = 1
 		Viewport.Size = UDim2.new(1, 0, 1, 0)
 		Viewport.CurrentCamera = Camera
 		Viewport.ZIndex = ZIndex + 2
+		-- Viewport should not block input to the button
+		Viewport.Active = false
 
 		WorldModel.Parent = Viewport
 		Camera.Parent = Viewport
-		Camera.FieldOfView = 60
+		Camera.FieldOfView = 50 -- Slightly lower FOV for better portrait view
+
+		local Rotation = 0
+		local IsDragging = false
+		local LastMouseX = 0
 
 		-- Safe Update Model Function
 		local function UpdateModel()
@@ -2527,48 +2541,54 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 					if ClonedChar then
 						ClonedChar.Parent = WorldModel
 						
-						-- Adjust Camera
+						-- Ensure PrimaryPart
 						local PrimaryPart = ClonedChar.PrimaryPart or ClonedChar:FindFirstChild("HumanoidRootPart")
 						if PrimaryPart then
-							local center = PrimaryPart.Position
-							Camera.CFrame = CFrame.new(center + Vector3.new(0, 0, -6), center)
+							ClonedChar.PrimaryPart = PrimaryPart
+							-- Reset Position to 0,0,0
+							ClonedChar:PivotTo(CFrame.new(Vector3.new(0, -2.5, 0)) * CFrame.Angles(0, math.rad(Rotation), 0))
 						end
 					end
 				end
 			end)
 		end
+		
+		-- Initial Camera Center
+		Camera.CFrame = CFrame.new(Vector3.new(0, 0, -11), Vector3.new(0, 0, 0))
 
 		UpdateModel()
+
+		-- Input Handling for Rotation
+		InputArea.MouseButton1Down:Connect(function()
+			IsDragging = true
+			LastMouseX = game:GetService("Players").LocalPlayer:GetMouse().X
+		end)
 		
-		-- Simple Rotation
-		local Rotation = 0
-		local connection
-		connection = game:GetService("RunService").RenderStepped:Connect(function(dt)
-			if not Container.Parent then 
-				if connection then connection:Disconnect() end
-				return 
-			end
-			
-			if Config.DisableRotation then return end
-			Rotation = Rotation + dt * 20 -- Speed
-			
-			local Char = WorldModel:FindFirstChildOfClass("Model")
-			if Char then
-				local pivot = Char:GetPivot()
-				-- Rotate around vertical axis
-				if Char.PrimaryPart then
-                     -- Reset to identity rotation then apply new rotation is tricky without accumulation issues?
-                     -- Easier: Just clone again or keep rotating?
-                     -- PivotTo is absolute.
-                     -- Let's construct a CFrame at 0,0,0 with rotation
-                     local newCF = CFrame.new(Vector3.zero) * CFrame.Angles(0, math.rad(Rotation), 0)
-                     Char:PivotTo(newCF)
-                     -- Point camera at 0,2,0
-                     Camera.CFrame = CFrame.new(Vector3.new(0, 2, -6), Vector3.new(0, 2, 0))
-				end
+		local UserInputService = game:GetService("UserInputService")
+		
+		local inputConnection
+		inputConnection = UserInputService.InputEnded:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseButton1 then
+				IsDragging = false
 			end
 		end)
 		
+		local moveConnection
+		moveConnection = UserInputService.InputChanged:Connect(function(input)
+			if IsDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+				local delta = input.Position.X - LastMouseX
+				LastMouseX = input.Position.X
+				
+				Rotation = Rotation + delta * 1.5
+				
+				local Char = WorldModel:FindFirstChildOfClass("Model")
+				if Char then
+					-- Keep position at 0,-2.5,0 but update rotation
+					Char:PivotTo(CFrame.new(Vector3.new(0, -2.5, 0)) * CFrame.Angles(0, math.rad(Rotation), 0))
+				end
+			end
+		end)
+
 		-- Handle Respawn
 		local respawnConnection
 		respawnConnection = game:GetService("Players").LocalPlayer.CharacterAdded:Connect(function()
@@ -2576,9 +2596,10 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 			UpdateModel()
 		end)
 		
-		-- Cleanup on destroy (Container removed)
+		-- Cleanup
 		Container.Destroying:Connect(function()
-			if connection then connection:Disconnect() end
+			if inputConnection then inputConnection:Disconnect() end
+			if moveConnection then moveConnection:Disconnect() end
 			if respawnConnection then respawnConnection:Disconnect() end
 		end)
 	end;
