@@ -1,8 +1,3 @@
---[[ 
-    IMPORTANT: We load the library from the local file 'GUI/GumballZ-UI-Lib.lua' 
-    because it contains the new 'AddDivider' and 'AddParagraph' features 
-    that are NOT yet on the public GitHub. 
-]]
 local function GetFileContent(path)
 	if readfile then return readfile(path) end
 	if getgenv and getgenv().readfile then return getgenv().readfile(path) end
@@ -15,8 +10,6 @@ local GumballZ
 if LibraryContent then
 	GumballZ = loadstring(LibraryContent)()
 else
-    -- Fallback for safety, but new features won't work
-	warn("⚠️ CRITICAL: Could not find local file 'GUI/GumballZ-UI-Lib.lua'. Divider/Paragraph will BREAK.")
 	GumballZ = loadstring(game:HttpGet("https://raw.githubusercontent.com/nughnguyen/GumballZ-UI-Library/refs/heads/main/GUI/GumballZ-UI-Lib.lua"))();
 end
 local Notification = GumballZ:CreateNotifier();
@@ -85,11 +78,13 @@ do
 
 	local General = Home:AddSection({
 		Position = 'left',
-		Name = "GENERAL",
+		Name = "",
 		Height = 5 -- Give it a bit more initial height
 	})
 
 	-- Movement Settings
+	General:AddDivider("MOVEMENT")
+
 	General:AddSlider({
 		Name = "WalkSpeed",
 		Default = 16,
@@ -141,6 +136,7 @@ do
 	})
 
 	-- Visual Settings
+	General:AddDivider("VISUAL")
 
 	General:AddSlider({
 		Name = "FOV",
@@ -263,7 +259,7 @@ do
 end
 
 --------------------------------------------------------------------------------
--- Info Tab (Refactored "About")
+-- Info Tab
 --------------------------------------------------------------------------------
 do
 	local Info = Window:AddMenu({
@@ -273,19 +269,20 @@ do
 
 	local UserInfo = Info:AddSection({
 		Position = 'left',
-		Name = "User Info"
+		Name = ""
 	});
 
 	local GameInfo = Info:AddSection({
 		Position = 'center',
-		Name = "Game Info"
+		Name = ""
 	});
 
 	local Socials = Info:AddSection({
 		Position = 'right',
-		Name = "Admin Socials"
+		Name = ""
 	});
-
+	UserInfo:AddDivider("USER")
+	
 	-- Player Name
 	UserInfo:AddButton({
 		Name = "Player: " .. LocalPlayer.Name,
@@ -303,7 +300,7 @@ do
 		end
 	})
 
-	UserInfo:AddPlayerView({ Height = 285 })
+	UserInfo:AddPlayerView({ Height = 260 })
 
 	-- Game Name
 	local success, gameInfo = pcall(function()
@@ -311,6 +308,7 @@ do
 	end)
 	local gameName = success and gameInfo.Name or "Unknown Game"
 
+	GameInfo:AddDivider("GAME")
 	GameInfo:AddButton({
 		Name = "Game: " .. gameName,
 		Callback = function()
@@ -327,11 +325,19 @@ do
 		end
 	})
 
+	GameInfo:AddButton({
+		Name = "Server Size: " .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers,
+		Callback = function()
+			setclipboard(#Players:GetPlayers() .. "/" .. Players.MaxPlayers)
+			Notification:Notify({Title = "Copied", Content = "Copied Server Size", Icon = "clipboard", Duration = 2})
+		end
+	})
+
 	-- Socials
-	Socials:AddDivider("Our Community")
+	Socials:AddDivider("OUR COMMUNITY")
 	
 	Socials:AddParagraph({
-		Title = "Join Us!",
+		Title = "JOIN US!",
 		Content = "Follow our official channels for the latest updates, giveaways, and community support."
 	})
 
