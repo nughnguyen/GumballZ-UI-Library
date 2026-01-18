@@ -2424,21 +2424,12 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		Paragraph.Name = GumballZ:RandomString()
 		Paragraph.Parent = Parent
 		Paragraph.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
-		Paragraph.BackgroundTransparency = 1
+		Paragraph.BackgroundTransparency = 0
 		Paragraph.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		Paragraph.BorderSizePixel = 0
 		Paragraph.Size = UDim2.new(1, -25, 0, 0) -- Height calculated below
 		Paragraph.ZIndex = ZIndex + 1
 		GumballZ:AddDragBlacklist(Paragraph)
-
-		-- Container for visual style (optional, maybe just text?) 
-		-- Based on typical UI lib style, paragraphs are usually inside a styled box or just text.
-		-- Let's make it look like a section item (dark bg).
-		
-        -- Actually, looking at AddToggle, items have transparent bg usually unless interacted? 
-        -- Let's give it a subtle background.
-        Paragraph.BackgroundColor3 = Color3.fromRGB(19, 19, 19)
-        Paragraph.BackgroundTransparency = 0 -- Opaque block
         
         UICorner.CornerRadius = UDim.new(0, 2)
         UICorner.Parent = Paragraph
@@ -2464,7 +2455,7 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		Content.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		Content.BackgroundTransparency = 1.000
 		Content.Position = UDim2.new(0, 10, 0, 25)
-		Content.Size = UDim2.new(1, -20, 0, 0) -- Height calc
+		Content.Size = UDim2.new(1, -20, 0, 0) 
 		Content.ZIndex = ZIndex + 2
 		Content.FontFace = Font.new('rbxasset://fonts/families/GothamSSm.json', Enum.FontWeight.Medium, Enum.FontStyle.Normal)
 		Content.Text = Config.Content
@@ -2474,8 +2465,12 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		Content.TextXAlignment = Enum.TextXAlignment.Left
 		Content.TextYAlignment = Enum.TextYAlignment.Top
 
-		-- Calculate Height
-		local ContentSize = GumballZ:GetTextSize(Content, Content.FontFace.Family, Content.TextSize, Vector2.new(Parent.AbsoluteSize.X - 45, 1000))
+		-- Calculate Height safely
+		local parentWidth = Parent.AbsoluteSize.X
+		if parentWidth < 50 then parentWidth = 300 end -- Fallback width if not rendered yet
+		local limitX = parentWidth - 45
+		
+		local ContentSize = GumballZ:GetTextSize(Content, Content.FontFace.Family, Content.TextSize, Vector2.new(limitX, 1000))
         Content.Size = UDim2.new(1, -20, 0, ContentSize.Y)
         Paragraph.Size = UDim2.new(1, -25, 0, ContentSize.Y + 35)
 	end;
@@ -2519,12 +2514,11 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		Viewport.Size = UDim2.new(1, 0, 1, 0)
 		Viewport.CurrentCamera = Camera
 		Viewport.ZIndex = ZIndex + 2
-		-- Viewport should not block input to the button
 		Viewport.Active = false
 
 		WorldModel.Parent = Viewport
 		Camera.Parent = Viewport
-		Camera.FieldOfView = 50 -- Slightly lower FOV for better portrait view
+		Camera.FieldOfView = 40 -- Lower FOV = less distortion, better portrait
 
 		local Rotation = 0
 		local IsDragging = false
@@ -2541,24 +2535,23 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 					if ClonedChar then
 						ClonedChar.Parent = WorldModel
 						
-						-- Ensure PrimaryPart
 						local PrimaryPart = ClonedChar.PrimaryPart or ClonedChar:FindFirstChild("HumanoidRootPart")
 						if PrimaryPart then
 							ClonedChar.PrimaryPart = PrimaryPart
-							-- Reset Position to 0,0,0
-							ClonedChar:PivotTo(CFrame.new(Vector3.new(0, -2.5, 0)) * CFrame.Angles(0, math.rad(Rotation), 0))
+							-- Center model at 0, -2, 0 roughly
+							ClonedChar:PivotTo(CFrame.new(Vector3.new(0, -2, 0)) * CFrame.Angles(0, math.rad(Rotation), 0))
 						end
 					end
 				end
 			end)
 		end
 		
-		-- Initial Camera Center
-		Camera.CFrame = CFrame.new(Vector3.new(0, 0, -11), Vector3.new(0, 0, 0))
+		-- Position camera further back for full body
+		Camera.CFrame = CFrame.new(Vector3.new(0, 0, -16), Vector3.new(0, 0, 0))
 
 		UpdateModel()
 
-		-- Input Handling for Rotation
+		-- Input Handling
 		InputArea.MouseButton1Down:Connect(function()
 			IsDragging = true
 			LastMouseX = game:GetService("Players").LocalPlayer:GetMouse().X
@@ -2578,14 +2571,31 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 			if IsDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
 				local delta = input.Position.X - LastMouseX
 				LastMouseX = input.Position.X
-				
+				-- Manual Rotate
 				Rotation = Rotation + delta * 1.5
-				
-				local Char = WorldModel:FindFirstChildOfClass("Model")
-				if Char then
-					-- Keep position at 0,-2.5,0 but update rotation
-					Char:PivotTo(CFrame.new(Vector3.new(0, -2.5, 0)) * CFrame.Angles(0, math.rad(Rotation), 0))
-				end
+			end
+		end)
+
+		-- Render Loop for Rotation + Updates
+		local connection
+		connection = game:GetService("RunService").RenderStepped:Connect(function(dt)
+			if not Container.Parent then 
+				if connection then connection:Disconnect() end
+				return 
+			end
+			
+			if Config.DisableRotation then return end
+			
+			-- Auto-rotate if not dragging
+			if not IsDragging then
+				Rotation = Rotation + dt * 25 -- Auto rotation speed
+			end
+			
+			-- Apply Rotation
+			local Char = WorldModel:FindFirstChildOfClass("Model")
+			if Char then
+				-- We pivot the character at 0,-2,0 (approx center height)
+				Char:PivotTo(CFrame.new(Vector3.new(0, -2, 0)) * CFrame.Angles(0, math.rad(Rotation), 0))
 			end
 		end)
 
@@ -2601,6 +2611,7 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 			if inputConnection then inputConnection:Disconnect() end
 			if moveConnection then moveConnection:Disconnect() end
 			if respawnConnection then respawnConnection:Disconnect() end
+			if connection then connection:Disconnect() end
 		end)
 	end;
 

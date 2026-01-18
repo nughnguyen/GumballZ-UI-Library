@@ -328,6 +328,7 @@ do
 	})
 
 	-- Socials
+	Socials:AddDivider("Our Community")
 	
 	Socials:AddParagraph({
 		Title = "Join Us!",
