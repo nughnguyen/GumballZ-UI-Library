@@ -2415,8 +2415,9 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		UICorner.CornerRadius = UDim.new(0, 2)
 		UICorner.Parent = ValueFrame
 
+
 		local UIStroke = Instance.new("UIStroke")
-		UIStroke.Color = GumballZ.Colors.Main
+		UIStroke.Color = Color3.fromRGB(255, 255, 255)
 		UIStroke.Thickness = 1
 		UIStroke.Parent = ValueFrame
 
@@ -2636,8 +2637,9 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		UICorner.CornerRadius = UDim.new(0, 2)
 		UICorner.Parent = ValueFrame
 
+
 		local UIStroke = Instance.new("UIStroke")
-		UIStroke.Color = GumballZ.Colors.Main
+		UIStroke.Color = Color3.fromRGB(255, 255, 255)
 		UIStroke.Thickness = 1
 		UIStroke.Parent = ValueFrame
 
@@ -3154,8 +3156,9 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		UICorner.CornerRadius = UDim.new(0, 2)
 		UICorner.Parent = ValueFrame
 
+
 		local UIStroke = Instance.new("UIStroke")
-		UIStroke.Color = GumballZ.Colors.Main
+		UIStroke.Color = Color3.fromRGB(255, 255, 255)
 		UIStroke.Thickness = 1
 		UIStroke.Parent = ValueFrame
 
