@@ -4717,7 +4717,8 @@ function GumballZ.new(Window: Window)
 				Gum.MenuSelected.ValueSelect(true)
 			end
 
-			GumballZ:CreateAnimation(GumFrame,0.15,{
+			GumFrame.Size = UDim2.new(0,0,0,0)
+			GumballZ:CreateAnimation(GumFrame,0.5,Enum.EasingStyle.Quart,{
 				Size = Window.Scale,
 				BackgroundTransparency = 0,
 			})
@@ -4886,23 +4887,24 @@ function GumballZ.new(Window: Window)
 				BackgroundTransparency = 1,
 			})
 
-			GumballZ:CreateAnimation(GumFrame,0.75,{
+			GumballZ:CreateAnimation(GumFrame,0.5,Enum.EasingStyle.Quart,{
+				Size = UDim2.new(0,0,0,0),
 				BackgroundTransparency = 1,
 			})
 
-			GumballZ:CreateAnimation(Header,0.5,{
+			GumballZ:CreateAnimation(Header,0.35,{
 				BackgroundTransparency = 1,
 			})
 
-			GumballZ:CreateAnimation(HeaderLine,0.5,{
+			GumballZ:CreateAnimation(HeaderLine,0.35,{
 				BackgroundTransparency = 1,
 			})
 
-			GumballZ:CreateAnimation(Bottom,0.5,{
+			GumballZ:CreateAnimation(Bottom,0.35,{
 				BackgroundTransparency = 1,
 			})
 
-			GumballZ:CreateAnimation(HeaderLine_2,0.5,{
+			GumballZ:CreateAnimation(HeaderLine_2,0.35,{
 				BackgroundTransparency = 1,
 			})
 
