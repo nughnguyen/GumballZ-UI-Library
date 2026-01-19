@@ -1,10 +1,29 @@
 
 local GumballZ = loadstring(game:HttpGet("https://raw.githubusercontent.com/nughnguyen/GumballZ-UI-Library/refs/heads/main/GUI/GumballZ-UI-Lib.lua"))();
 
-local Notification = GumballZ:CreateNotifier();
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+local Notification = GumballZ:CreateNotifier();
+
 local MarketplaceService = game:GetService("MarketplaceService")
+local HttpService = game:GetService("HttpService")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local PathfindingService = game:GetService("PathfindingService")
+local Workspace = game:GetService("Workspace")
+local TeleportService = game:GetService("TeleportService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local Camera = Workspace.CurrentCamera
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+
+local Config = {
+	Name = "GumballZ",
+	Version = "1.0.0",
+	Author = "Nguyen Quoc Hung",
+	Description = "A Roblox script for all games",
+}
 
 GumballZ:Loader({
 	Name = "GumballZ",
@@ -12,9 +31,10 @@ GumballZ:Loader({
 });
 
 Notification:Notify({
-	Title = "GumballZ",
+	Title = Config.Name.." | "..Config.Version,
 	Content = "Hello, "..LocalPlayer.DisplayName..' Welcome back!',
-	Icon = "clipboard"
+	Icon = "clipboard",
+	Duration = 2
 })
 
 local Window = GumballZ.new({
