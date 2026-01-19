@@ -1,81 +1,10 @@
-local function GetFileContent(path)
-	if readfile then return readfile(path) end
-	if getgenv and getgenv().readfile then return getgenv().readfile(path) end
-	return nil
-end
 
-local LibraryContent = pcall(function() return GetFileContent("GUI/GumballZ-UI-Lib.lua") end) and GetFileContent("GUI/GumballZ-UI-Lib.lua")
-local GumballZ
+local GumballZ = loadstring(game:HttpGet("https://raw.githubusercontent.com/nughnguyen/GumballZ-UI-Library/refs/heads/main/GUI/GumballZ-UI-Lib.lua"))();
 
-if LibraryContent then
-	GumballZ = loadstring(LibraryContent)()
-else
-	GumballZ = loadstring(game:HttpGet("https://raw.githubusercontent.com/nughnguyen/GumballZ-UI-Library/refs/heads/main/GUI/GumballZ-UI-Lib.lua"))();
-end
 local Notification = GumballZ:CreateNotifier();
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local MarketplaceService = game:GetService("MarketplaceService")
-
--- Helper function to open URLs
-local function OpenUrl(link)
-	-- 1. Always copy to clipboard first as a guaranteed fallback
-	if setclipboard then
-		setclipboard(link)
-	end
-	
-	local opened = false
-
-	-- 2. Try Executor Specific functions
-	if getgenv and getgenv().request then
-		-- Some executors intercept requests to localhost/specific schemes to open browser
-		-- But standard 'request' just makes an HTTP request.
-		-- We typically rely on 'visit' or 'openurl'
-	end
-
-	if not opened and getgenv and rawget(getgenv(), "visit") then 
-		local s = pcall(visit, link) 
-		if s then opened = true end
-	end
-	
-	if not opened and getgenv and rawget(getgenv(), "openurl") then
-		local s = pcall(openurl, link)
-		if s then opened = true end
-	end
-
-	-- 3. Try Roblox Services (Works in standard client if allowed/policy service permits)
-	if not opened then
-		local s = pcall(function()
-			game:GetService("GuiService"):OpenBrowserWindow(link)
-		end)
-		if s then opened = true end
-	end
-	
-	-- 4. Try LinkingService (Older method, sometimes works)
-	if not opened then
-		local s = pcall(function()
-			game:GetService("LinkingService"):OpenUrl(link)
-		end)
-		if s then opened = true end
-	end
-
-    -- 5. Notify user
-	if not opened then
-		-- If we couldn't auto-open, tell them it's copied
-		if Notification and Notification.Notify then
-            Notification:Notify({Title = "Link Copied", Content = "Paste it in your browser!", Icon = "clipboard", Duration = 3})
-        else
-            -- Check for StarterGui fallback if UI lib not ready
-             pcall(function()
-                game:GetService("StarterGui"):SetCore("SendNotification", {
-                    Title = "Link Copied";
-                    Text = "Paste it in your browser!";
-                    Duration = 3;
-                })
-             end)
-        end
-	end
-end
 
 GumballZ:Loader({
 	Name = "GumballZ",
@@ -380,7 +309,7 @@ do
 
 	-- Socials
 	Socials:AddDivider("OUR COMMUNITY")
-	
+
 	Socials:AddParagraph({
 		Title = "JOIN US!",
 		Content = "Follow our official channels for the latest updates, giveaways, and community support."
@@ -390,8 +319,8 @@ do
 		Name = "Discord Server",
 		Callback = function()
 			local link = "https://dsc.gg/thenoicez" 
-			OpenUrl(link)
-			Notification:Notify({Title = "GumballZ", Content = "Opening Discord...", Icon = "globe", Duration = 2})
+			setclipboard(link)
+			Notification:Notify({Title = "GumballZ", Content = "Copied Discord Link, paste it in your browser!", Icon = "clipboard", Duration = 2})
 		end
 	})
 	
@@ -399,8 +328,8 @@ do
 		Name = "YouTube Channel",
 		Callback = function()
 			local link = "https://youtube.com/@nughnguyen" 
-			OpenUrl(link)
-			Notification:Notify({Title = "GumballZ", Content = "Opening YouTube...", Icon = "globe", Duration = 2})
+			setclipboard(link)
+			Notification:Notify({Title = "GumballZ", Content = "Copied YouTube Link, paste it in your browser!", Icon = "clipboard", Duration = 2})
 		end
 	})
 
@@ -408,8 +337,8 @@ do
 		Name = "Facebook Admin",
 		Callback = function()
 			local link = "https://facebook.com/hungnq188.2k5" 
-			OpenUrl(link)
-			Notification:Notify({Title = "GumballZ", Content = "Opening Facebook...", Icon = "globe", Duration = 2})
+			setclipboard(link)
+			Notification:Notify({Title = "GumballZ", Content = "Copied Facebook Link, paste it in your browser!", Icon = "clipboard", Duration = 2})
 		end
 	})
 end
