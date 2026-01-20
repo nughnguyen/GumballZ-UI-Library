@@ -20,7 +20,7 @@ local Humanoid = Character:WaitForChild("Humanoid")
 
 local Config = {
 	Name = "GumballZ",
-	Version = "1.0.0",
+	Version = "1.0.12",
 	Author = "Nguyen Quoc Hung",
 	Description = "A Roblox script for all games",
 }
@@ -42,13 +42,42 @@ local Window = GumballZ.new({
 	Expire = "never",
 	KeySettings = {
 		Title = "GumballZ Key System",
-		Subtitle = "Join Discord to get the key",
-		Note = "Discord Link Copied!",
+		Subtitle = "Get Key: GumballZ Website",
+		Note = "Key Link Copied!",
 		FileName = "GumballZKey",
 		SaveKey = true,
-		GrabKeyFromSite = false,
-		Key = {"1234", "KeyTest"}, 
-		URL = "https://dsc.gg/thenoicez"
+		GrabKeyFromSite = true, -- Disable list fetching
+		Key = function(EnteredKey)
+            -- Custom Key Verification Logic with HWID Binding
+            local HttpService = game:GetService("HttpService")
+            local RBXAnalytics = game:GetService("RbxAnalyticsService")
+            local HWID = RBXAnalytics:GetClientId()
+            
+            local success, response = pcall(function()
+                return game:HttpGet("https://gumballzhub.vercel.app/api/keys/roblox-valid?key=" .. EnteredKey .. "&hwid=" .. HWID)
+            end)
+            
+            if success then
+                local data = HttpService:JSONDecode(response)
+                if data.valid then
+					-- Format Date: YYYY-MM-DDTHH:MM:SS -> DD/MM/YYYY
+					if data.expires_at then
+						local Year, Month, Day = data.expires_at:match("(%d+)-(%d+)-(%d+)")
+						KeyExpireDate = Day .. "/" .. Month .. "/" .. Year
+					end
+                    return true, KeyExpireDate
+                else
+                    -- Optional: Notify user of specific error (like HWID mismatch)
+                    if data.message then
+                        -- GumballZ:MakeNotification({Title="Error", Content=data.message, Icon="alert", Time=3})
+                        -- Since we are inside the callback, we just return false. 
+                        -- The Lib will likely show "Invalid Key".
+                    end
+                end
+            end
+            return false
+        end,
+		URL = "https://gumballzhub.vercel.app/keys?type=roblox"
 	}
 });
 
@@ -360,5 +389,72 @@ do
 			setclipboard(link)
 			Notification:Notify({Title = "GumballZ", Content = "Copied Facebook Link, paste it in your browser!", Icon = "clipboard", Duration = 2})
 		end
+	})
+end
+
+--------------------------------------------------------------------------------
+-- Showcase Tab (New Features)
+--------------------------------------------------------------------------------
+do
+	local Showcase = Window:AddMenu({
+		Name = "Showcase",
+		Icon = "star"
+	})
+
+	local TextElems = Showcase:AddSection({ Name = "TEXT ELEMENTS", Position = 'left' })
+	local VisualElems = Showcase:AddSection({ Name = "VISUAL ELEMENTS", Position = 'center' })
+	local InteractElems = Showcase:AddSection({ Name = "INTERACTIVE", Position = 'right' })
+
+	-- Text Elements Section
+	TextElems:AddDivider("PARAGRAPHS")
+	TextElems:AddParagraph({
+		Title = "Welcome User!",
+		Content = "This is a paragraph element. It's great for displaying instructions, changelogs, or credits to your users."
+	})
+	
+	TextElems:AddDivider("DIVIDERS")
+	TextElems:AddParagraph({
+		Title = "Dividers",
+		Content = "Dividers (like the one above) helps organize your sections into logical groups."
+	})
+
+	-- Visual Elements Section
+	VisualElems:AddDivider("PLAYER VIEW")
+	VisualElems:AddPlayerView({ Height = 200 })
+	VisualElems:AddParagraph({
+		Title = "Live Character",
+		Content = "The PlayerView element renders a live preview of the local player's character model."
+	})
+
+	-- Interactive Section
+	InteractElems:AddDivider("COMPLEX TOGGLE")
+	local complexToggle = InteractElems:AddToggle({ 
+		Name = "Complex Switch", 
+		Option = true 
+	})
+	
+	-- Sub-options for the toggle
+	local opts = complexToggle.Option
+	opts:AddColorPicker({ 
+		Name = "Active Color", 
+		Default = Color3.fromRGB(0, 255, 255) 
+	})
+	opts:AddSlider({
+		Name = "Intensity",
+		Min = 0,
+		Max = 100,
+		Default = 50
+	})
+	opts:AddKeybind({
+		Name = "Quick Toggle",
+		Default = Enum.KeyCode.F
+	})
+
+	InteractElems:AddDivider("DROPDOWNS")
+	InteractElems:AddDropdown({
+		Name = "Multi Select",
+		Multi = true,
+		Values = {"Option A", "Option B", "Option C"},
+		Default = {"Option A", "Option C"}
 	})
 end
