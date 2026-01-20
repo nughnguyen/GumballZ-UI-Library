@@ -185,8 +185,8 @@ do
 		Icon = "target"
 	})
 
-	local Aim = Legit:AddSection({ Position = 'left', Name = "AIM" });
-	local Rcs = Legit:AddSection({ Position = 'left', Name = "RCS" });
+	local Aim = Legit:AddSection({ Position = 'left', Name = "AIM", Height = 260 });
+	local Rcs = Legit:AddSection({ Position = 'left', Name = "RCS", Height = 180 });
 	local Trigger = Legit:AddSection({ Position = 'center', Name = "TRIGGER" });
 	local Backtrack = Legit:AddSection({ Position = 'center', Name = "BACKTRACK" });
 	local General = Legit:AddSection({ Position = 'right', Name = "GENERAL" });

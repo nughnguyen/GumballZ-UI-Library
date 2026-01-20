@@ -6383,7 +6383,7 @@ function GumballZ.new(Window: Window)
 			});
 
 			local Section = Instance.new("Frame")
-			local Elements = Instance.new("Frame")
+			local Elements = Instance.new("ScrollingFrame")
 			local UIStroke = Instance.new("UIStroke")
 			local UICorner = Instance.new("UICorner")
 			local UIListLayout = Instance.new("UIListLayout")
@@ -6437,6 +6437,9 @@ function GumballZ.new(Window: Window)
 			Elements.BorderSizePixel = 0
 			Elements.Position = UDim2.new(0.5, 0, 1, -1)
 			Elements.Size = UDim2.new(1, -5, 1, -10)
+			Elements.ScrollBarThickness = 2
+			Elements.ScrollBarImageColor3 = GumballZ.Colors.Main
+			Elements.CanvasSize = UDim2.new(0, 0, 0, 0)
 
 			UIStroke.Color = Color3.fromRGB(29, 29, 29)
 			UIStroke.Parent = Elements
@@ -6473,15 +6476,26 @@ function GumballZ.new(Window: Window)
 
 
 			local function UpdateSize()
-				local MainScale = UIListLayout.AbsoluteContentSize.Y + 20 + Config.Height;
+				local IsFixedHeight = Config.Height > 20
+				local ContentSize = UIListLayout.AbsoluteContentSize.Y + 20 + ((not IsFixedHeight and Config.Height) or 0);
+				
+				Elements.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y + 10)
 
-				if not Menu.AutoFill then
+				if IsFixedHeight then
 					GumballZ:CreateAnimation(Section,0.25,{
-						Size = UDim2.new(1, 0, 0, MainScale)
+						Size = UDim2.new(1, 0, 0, Config.Height)
 					})
 				else
-					Section.Size = UDim2.new(1,0,0,MainScale / 2.5);
-				end;
+					local MainScale = ContentSize;
+
+					if not Menu.AutoFill then
+						GumballZ:CreateAnimation(Section,0.25,{
+							Size = UDim2.new(1, 0, 0, MainScale)
+						})
+					else
+						Section.Size = UDim2.new(1,0,0,MainScale / 2.5);
+					end;
+				end
 			end;
 
 			UIListLayout:GetPropertyChangedSignal('AbsoluteContentSize'):Connect(UpdateSize);
