@@ -2699,7 +2699,7 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		OptionButton.BackgroundTransparency = 1.000
 		OptionButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		OptionButton.BorderSizePixel = 0
-		OptionButton.Position = UDim2.new(1, -25, 0.5, 0)
+		OptionButton.Position = UDim2.new(1, -40, 0.5, 0)
 		OptionButton.Size = UDim2.new(0.899999976, 0, 0.899999976, 0)
 		OptionButton.SizeConstraint = Enum.SizeConstraint.RelativeYY
 		OptionButton.Image = "http://www.roblox.com/asset/?id=14007344336"
@@ -4456,6 +4456,14 @@ function GumballZ.new(Window: Window)
 			elseif typeof(KeySettings.Key) == "string" then
 				if savedKey == KeySettings.Key then
 					success = true
+				end
+			elseif typeof(KeySettings.Key) == "function" then
+				local success_key, expire_date = KeySettings.Key(savedKey)
+				if success_key then
+					success = true
+					if expire_date then
+						Window.Expire = expire_date
+					end
 				end
 			end
 		end

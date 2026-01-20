@@ -228,10 +228,7 @@ do
 	-- General Section
 	General:AddToggle({ Name = "Enabled" })
 	General:AddDropdown({ Name = "Disablers", Values = {"d1",'d2'} })
-	General:AddToggle({ Name = "Visualize fov", Option = true }).Option:AddColorPicker({
-		Name = "Color",
-		Default = Color3.fromRGB(255, 34, 75)
-	})
+	General:AddToggle({ Name = "Visualize fov"})
 	General:AddToggle({ Name = "Autorevolver" })
 end
 
