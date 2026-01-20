@@ -2628,7 +2628,8 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		local Toggle_Name = Instance.new("TextLabel")
 		local ValueFrame = Instance.new("Frame")
 		local UICorner = Instance.new("UICorner")
-		local ValueIcon = Instance.new("ImageLabel")
+		local SwitchBall = Instance.new("Frame")
+		local SwitchBallCorner = Instance.new("UICorner")
 		local OptionButton = Instance.new("ImageButton")
 
 		if SearchAPI then
@@ -2666,36 +2667,30 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		ValueFrame.Name = GumballZ:RandomString()
 		ValueFrame.Parent = Toggle
 		ValueFrame.AnchorPoint = Vector2.new(1, 0.5)
-		ValueFrame.BackgroundColor3 = GumballZ.Colors.Black
+		ValueFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 		ValueFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 		ValueFrame.BorderSizePixel = 0
 		ValueFrame.Position = UDim2.new(1, -3, 0.5, 0)
-		ValueFrame.Size = UDim2.new(0.899999976, 0, 0.899999976, 0)
-		ValueFrame.SizeConstraint = Enum.SizeConstraint.RelativeYY
+		ValueFrame.Size = UDim2.new(0, 32, 0, 16)
 		ValueFrame.ZIndex = ZIndex + 2
 		ValueFrame.BackgroundTransparency = 1;
 
-		UICorner.CornerRadius = UDim.new(0, 2)
+		UICorner.CornerRadius = UDim.new(1, 0)
 		UICorner.Parent = ValueFrame
 
+		SwitchBall.Name = GumballZ:RandomString()
+		SwitchBall.Parent = ValueFrame
+		SwitchBall.AnchorPoint = Vector2.new(0, 0.5)
+		SwitchBall.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		SwitchBall.BackgroundTransparency = 1.000
+		SwitchBall.BorderColor3 = Color3.fromRGB(0, 0, 0)
+		SwitchBall.BorderSizePixel = 0
+		SwitchBall.Position = UDim2.new(0, 2, 0.5, 0)
+		SwitchBall.Size = UDim2.new(0, 12, 0, 12)
+		SwitchBall.ZIndex = ZIndex + 3
 
-		local UIStroke = Instance.new("UIStroke")
-		UIStroke.Color = GumballZ.Colors.Main
-		UIStroke.Thickness = 1
-		UIStroke.Parent = ValueFrame
-
-		ValueIcon.Name = GumballZ:RandomString()
-		ValueIcon.Parent = ValueFrame
-		ValueIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-		ValueIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-		ValueIcon.BackgroundTransparency = 1.000
-		ValueIcon.BorderColor3 = Color3.fromRGB(0, 0, 0)
-		ValueIcon.BorderSizePixel = 0
-		ValueIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
-		ValueIcon.Size = UDim2.new(0.699999988, 0, 0.699999988, 0)
-		ValueIcon.ZIndex = ZIndex + 2
-		ValueIcon.Image = "rbxassetid://10709790644"
-		ValueIcon.ImageTransparency = 1;
+		SwitchBallCorner.CornerRadius = UDim.new(1, 0)
+		SwitchBallCorner.Parent = SwitchBall
 
 		OptionButton.Name = GumballZ:RandomString()
 		OptionButton.Parent = Toggle
@@ -2714,26 +2709,36 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 
 		local toggleImg = function(value)
 			if value then
-				GumballZ:CreateAnimation(ValueIcon,0.45,{
-					ImageTransparency = 0,
-					ImageColor3 = GumballZ.Colors.Main,
-					Size = UDim2.new(0.8, 0, 0.8, 0),
-					Rotation = 0,
+				GumballZ:CreateAnimation(SwitchBall,0.25,{
+					Position = UDim2.new(1, -14, 0.5, 0)
+				})
+
+				GumballZ:CreateAnimation(ValueFrame,0.25,{
+					BackgroundColor3 = GumballZ.Colors.Main
 				})
 			else
-				GumballZ:CreateAnimation(ValueIcon,0.45,{
-					ImageTransparency = 1,
-					ImageColor3 = Color3.fromRGB(255, 255, 255),
-					Size = UDim2.new(0.699999988, 0, 0.699999988, 0),
-					Rotation = 15
+				GumballZ:CreateAnimation(SwitchBall,0.25,{
+					Position = UDim2.new(0, 2, 0.5, 0)
+				})
+
+				GumballZ:CreateAnimation(ValueFrame,0.25,{
+					BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 				})
 			end;
 		end;
 
 		local OpcToggle = function(value)
 			if value then
-				GumballZ:CreateAnimation(ValueIcon,0.45,{
-					ImageTransparency = 1,
+				GumballZ:CreateAnimation(Toggle_Name,0.45,{
+					TextTransparency = 0.200
+				})
+
+				GumballZ:CreateAnimation(ValueFrame,0.45,{
+					BackgroundTransparency = 0,
+				})
+
+				GumballZ:CreateAnimation(SwitchBall,0.45,{
+					BackgroundTransparency = 0,
 				})
 
 				GumballZ:CreateAnimation(OptionButton,0.45,{
@@ -2741,14 +2746,6 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 				})
 
 				toggleImg(Config.Default)
-
-				GumballZ:CreateAnimation(ValueFrame,0.45,{
-					BackgroundTransparency = 0,
-				})
-
-				GumballZ:CreateAnimation(Toggle_Name,0.45,{
-					TextTransparency = 0.200
-				})
 			else
 				GumballZ:CreateAnimation(Toggle_Name,0.45,{
 					TextTransparency = 1
@@ -2758,12 +2755,8 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 					BackgroundTransparency = 1,
 				})
 
-				GumballZ:CreateAnimation(ValueIcon,0.45,{
-					ImageTransparency = 1,
-				})
-
-				GumballZ:CreateAnimation(ValueIcon,0.45,{
-					ImageTransparency = 1,
+				GumballZ:CreateAnimation(SwitchBall,0.45,{
+					BackgroundTransparency = 1,
 				})
 
 				GumballZ:CreateAnimation(OptionButton,0.45,{
@@ -2779,18 +2772,12 @@ function GumballZ:CreateElements(Parent : Frame , ZIndex : number , Event : Bind
 		GumballZ:CreateHover(ValueFrame,function(b)
 			if not Config.Default then
 				if b then
-					GumballZ:CreateAnimation(ValueIcon,0.45,{
-						ImageTransparency = 0.5,
-						ImageColor3 = Color3.fromRGB(255, 255, 255),
-						Size = UDim2.new(0.7, 0, 0.7, 0),
-						Rotation = 0
+					GumballZ:CreateAnimation(ValueFrame,0.45,{
+						BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 					})
 				else
-					GumballZ:CreateAnimation(ValueIcon,0.45,{
-						ImageTransparency = 1,
-						ImageColor3 = Color3.fromRGB(255, 255, 255),
-						Size = UDim2.new(0.699999988, 0, 0.699999988, 0),
-						Rotation = 15
+					GumballZ:CreateAnimation(ValueFrame,0.45,{
+						BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 					})
 				end;
 			end;
@@ -4423,6 +4410,8 @@ function GumballZ:CreateConfigWindow(Root: ScreenGui , Gum , Button: ImageButton
 end;
 
 function GumballZ.new(Window: Window)
+	local Players = game:GetService("Players")
+	local Client = Players.LocalPlayer
 	Window = Window or {};
 	Window.Name = Window.Name or "GUMBALLZ";
 	Window.Scale = Window.Scale or UDim2.new(0, 750, 0, 500);
@@ -4448,7 +4437,7 @@ function GumballZ.new(Window: Window)
 	Gum.Notifier = GumballZ.__NOTIFIER_CACHE or GumballZ:CreateNotifier();
 
 	-- Key System Implementation
-	if Window.KeySettings and Window.KeySettings.Key and (typeof(Window.KeySettings.Key) == "string" and Window.KeySettings.Key ~= "" or typeof(Window.KeySettings.Key) == "table" and #Window.KeySettings.Key > 0) then
+	if Window.KeySettings and Window.KeySettings.Key and (typeof(Window.KeySettings.Key) == "string" and Window.KeySettings.Key ~= "" or typeof(Window.KeySettings.Key) == "table" and #Window.KeySettings.Key > 0 or typeof(Window.KeySettings.Key) == "function") then
 		local KeySettings = Window.KeySettings
 		local savedKey = ""
 		local success = false
@@ -4613,6 +4602,14 @@ function GumballZ.new(Window: Window)
 				elseif typeof(KeySettings.Key) == "string" then
 					if inputKey == KeySettings.Key then
 						valid = true
+					end
+				elseif typeof(KeySettings.Key) == "function" then
+					local success_key, expire_date = KeySettings.Key(inputKey)
+					if success_key then
+						valid = true
+						if expire_date then
+							Window.Expire = expire_date
+						end
 					end
 				end
 				
@@ -4779,12 +4776,12 @@ function GumballZ.new(Window: Window)
 
 			GumballZ:CreateAnimation(User_name,0.35,{
 				TextTransparency = 0,
-				Position = UDim2.new(1, -40,0, 3)
+				Position = UDim2.new(1, -40,0, 5)
 			})
 
 			GumballZ:CreateAnimation(expire_days,0.5,{
 				TextTransparency = 0,
-				Position = UDim2.new(1, -40,0, 16)
+				Position = UDim2.new(1, -40,0, 20)
 			})
 
 			GumballZ:CreateAnimation(UIStroke,0.35,{
@@ -4846,12 +4843,12 @@ function GumballZ.new(Window: Window)
 
 			GumballZ:CreateAnimation(User_name,0.35,{
 				TextTransparency = 1,
-				Position = UDim2.new(1, -40,0, 3)
+				Position = UDim2.new(1, -40,0, 5)
 			})
 
 			GumballZ:CreateAnimation(expire_days,0.1,{
 				TextTransparency = 1,
-				Position = UDim2.new(1, -40,0, 16)
+				Position = UDim2.new(1, -40,0, 20)
 			})
 
 			GumballZ:CreateAnimation(HeaderText,0.35,{
@@ -5063,7 +5060,7 @@ function GumballZ.new(Window: Window)
 	User_name.BackgroundTransparency = 1.000
 	User_name.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	User_name.BorderSizePixel = 0
-	User_name.Position = UDim2.new(1, -40, 0, 3)
+	User_name.Position = UDim2.new(1, -40, 0, 5)
 	User_name.Size = UDim2.new(0, 200, 0, 15)
 	User_name.ZIndex = 4
 	User_name.Font = Enum.Font.GothamMedium
@@ -5080,7 +5077,7 @@ function GumballZ.new(Window: Window)
 	expire_days.BackgroundTransparency = 1.000
 	expire_days.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	expire_days.BorderSizePixel = 0
-	expire_days.Position = UDim2.new(1, -40, 0, 16)
+	expire_days.Position = UDim2.new(1, -40, 0, 20)
 	expire_days.Size = UDim2.new(0, 200, 0, 15)
 	expire_days.ZIndex = 4
 	expire_days.Font = Enum.Font.GothamMedium
