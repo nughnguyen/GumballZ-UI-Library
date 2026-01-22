@@ -29,8 +29,7 @@ GumballZ:Loader({
 	Name = "GumballZ",
 	Duration = 1,
 	Particle = true,
-	ParticleDuration = 10,
-	ParticleScale = 3,
+	ParticleDuration = 5,
 });
 
 Notification:Notify({
