@@ -7100,6 +7100,10 @@ function GumballZ:Loader(Config: Loader)
 	Config.Name = Config.Name or "GUMBALLZ";
 	Config.Duration = Config.Duration or 3.5;
 	Config.Scale = Config.Scale or 3;
+	
+	-- particle logic state
+	local activeVFXCount = 0
+	local isVFXSpawning = false
 
 	-- Particle Effect Integration (Advanced 3D VFX)
 	if Config.Particle then
@@ -7254,16 +7258,21 @@ function GumballZ:Loader(Config: Loader)
 						part.CFrame = CFrame.new(root.Position)
 						spawnHRPEffect_v()
 						part:Destroy()
+						activeVFXCount = activeVFXCount - 1 -- Decrement on finish
+					else
+						-- Safety decrement if something went wrong
+						activeVFXCount = activeVFXCount - 1
 					end
 				end)
 			end
 			
 			-- Spawner Loop
-			local spawning = true
+			isVFXSpawning = true
 			task.spawn(function()
-				while spawning do
+				while isVFXSpawning do
 					for i=1, density do
 						spawnHomingParticle()
+						activeVFXCount = activeVFXCount + 1 -- Track Active
 						task.wait(math.random(0.1, 0.3))
 					end
 					task.wait(0.5)
@@ -7271,17 +7280,12 @@ function GumballZ:Loader(Config: Loader)
 			end)
 			
 			task.delay(duration, function()
-				spawning = false
-				-- Do not destroy physics parts immediately; let them fly to target.
-				-- Only clean up non-part objects if really necessary, or just let them GC naturally
-				-- since the parts destroy themselves on impact.
-				
-				-- If you really want to force clean up attachments/connections that might hang:
+				isVFXSpawning = false -- Stop Spawning
+				-- cleanupObjects handling...
 				for _, v in pairs(cleanupObjects) do
 					if typeof(v) == "RBXScriptConnection" then 
 						v:Disconnect()
 					elseif typeof(v) == "Instance" and v:IsA("Attachment") and v.Parent == root then
-						-- Clean up root attachments, but leave flying parts alone
 						v:Destroy()
 					end
 				end
@@ -7506,6 +7510,14 @@ function GumballZ:Loader(Config: Loader)
 
 		Loader:Destroy();
 		if Blur then Blur:Destroy() end
+		
+		-- Wait for all particles to finish logic before returning
+		-- This delays the GumballZ.new() call until VFX is done.
+		if Config.Particle then
+			while isVFXSpawning or activeVFXCount > 0 do
+				task.wait(0.1)
+			end
+		end
 	end;
 end;
 
