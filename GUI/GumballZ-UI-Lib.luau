@@ -7272,9 +7272,17 @@ function GumballZ:Loader(Config: Loader)
 			
 			task.delay(duration, function()
 				spawning = false
+				-- Do not destroy physics parts immediately; let them fly to target.
+				-- Only clean up non-part objects if really necessary, or just let them GC naturally
+				-- since the parts destroy themselves on impact.
+				
+				-- If you really want to force clean up attachments/connections that might hang:
 				for _, v in pairs(cleanupObjects) do
-					if typeof(v) == "Instance" then v:Destroy()
-					elseif typeof(v) == "RBXScriptConnection" then v:Disconnect()
+					if typeof(v) == "RBXScriptConnection" then 
+						v:Disconnect()
+					elseif typeof(v) == "Instance" and v:IsA("Attachment") and v.Parent == root then
+						-- Clean up root attachments, but leave flying parts alone
+						v:Destroy()
 					end
 				end
 			end)
