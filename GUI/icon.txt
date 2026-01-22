@@ -1,4 +1,4 @@
-ReGui.Icons = {
+Icons = {
 	Dot = "rbxasset://textures/whiteCircle.png",
 	Arrow = "rbxasset://textures/DeveloperFramework/button_arrow_right.png",
 	Close = "rbxasset://textures/AnimationEditor/icon_close.png",

@@ -17,7 +17,10 @@ export type Window = {
 export type Loader = {
 	Name: string,
 	Duration: number,
-	Scale: number
+	Scale: number,
+	Particle: boolean?,
+	["particle duration"]: number?,
+	Blur: boolean?
 }
 
 export type Menu = {
@@ -7096,7 +7099,111 @@ function GumballZ:Loader(Config: Loader)
 	Config.Duration = Config.Duration or 3.5;
 	Config.Scale = Config.Scale or 3;
 
-	local Blur = Instance.new('BlurEffect');
+	-- Particle Effect Integration
+	if Config.Particle then
+		task.spawn(function()
+			local duration = Config["particle duration"] or Config.Duration or 3
+			local char = Client.Character or Client.CharacterAdded:Wait()
+			local root = char:WaitForChild("HumanoidRootPart", 5)
+			if not root then return end
+			
+			local cleanupObjects = {}
+			
+			-- 1. Chaotic Central Burst (Volume)
+			local burstAtt = Instance.new("Attachment")
+			burstAtt.Parent = root
+			table.insert(cleanupObjects, burstAtt)
+			
+			local burst = Instance.new("ParticleEmitter")
+			burst.Parent = burstAtt
+			burst.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+			burst.Color = ColorSequence.new({
+				ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 255)),   -- Cyan
+				ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 255)), -- Magenta
+				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 0)),  -- Yellow
+				ColorSequenceKeypoint.new(0.75, Color3.fromRGB(0, 255, 0)),   -- Green
+				ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 255))       -- Blue
+			})
+			burst.Size = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0.3),
+				NumberSequenceKeypoint.new(0.5, 0.8),
+				NumberSequenceKeypoint.new(1, 0)
+			})
+			burst.Transparency = NumberSequence.new({
+				NumberSequenceKeypoint.new(0, 0),
+				NumberSequenceKeypoint.new(0.8, 0.2),
+				NumberSequenceKeypoint.new(1, 1)
+			})
+			burst.Lifetime = NumberRange.new(0.5, 1.2)
+			burst.Rate = 150 -- "Nhiều hạt hơn"
+			burst.Speed = NumberRange.new(2, 8)
+			burst.SpreadAngle = Vector2.new(360, 360) -- "3D hơn"
+			burst.Drag = 2 -- "Di chuyển ngẫu nhiên" (floats around)
+			burst.Acceleration = Vector3.new(0, 1, 0)
+			burst.LightEmission = 1
+			burst.ZOffset = 0.5
+
+			-- 2. Dynamic Orbiters (Random Movement)
+			local function CreateChaoticOrbiter(speedOpts, radius)
+				local att = Instance.new("Attachment")
+				att.Parent = root
+				table.insert(cleanupObjects, att)
+				
+				local trail = Instance.new("ParticleEmitter")
+				trail.Parent = att
+				trail.Texture = "rbxassetid://1084964344" -- Smooth Glow
+				trail.Color = ColorSequence.new(Color3.fromHSV(math.random(), 1, 1)) -- Random vivid color
+				trail.Size = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 0.5),
+					NumberSequenceKeypoint.new(1, 0)
+				})
+				trail.Rate = 50
+				trail.Lifetime = NumberRange.new(0.3, 0.5)
+				trail.Speed = NumberRange.new(0)
+				trail.LockedToPart = true
+				trail.LightEmission = 1
+				
+				local t = math.random() * 10
+				local speedX, speedY, speedZ = unpack(speedOpts)
+				
+				local conn = RunService.RenderStepped:Connect(function()
+					if not root.Parent then return end
+					t = t + 0.03
+					-- Lissajous-like chaotic 3D Orbit
+					local x = math.sin(t * speedX) * radius
+					local y = math.cos(t * speedY) * radius
+					local z = math.sin(t * speedZ) * radius
+					att.Position = Vector3.new(x, y, z)
+				end)
+				table.insert(cleanupObjects, conn)
+			end
+			
+			-- Spawn multiple chaotic orbiters
+			for i = 1, 6 do
+				CreateChaoticOrbiter({math.random(1,4), math.random(1,4), math.random(1,4)}, 4 + math.random(1,3))
+			end
+
+			task.delay(duration, function()
+				for _, v in pairs(cleanupObjects) do
+					if typeof(v) == "Instance" then v:Destroy()
+					elseif typeof(v) == "RBXScriptConnection" then v:Disconnect()
+					end
+				end
+			end)
+		end)
+	end
+
+	local Blur
+	if Config.Blur then
+		Blur = Instance.new('BlurEffect');
+		Blur.Size = 0;
+		Blur.Parent = game:GetService('Lighting');
+		
+		GumballZ:CreateAnimation(Blur,1,{
+			Size = 60
+		})
+	end
+
 	local Loader = Instance.new("ScreenGui")
 	local center = Instance.new("Frame")
 	local texts = Instance.new("Frame")
@@ -7141,13 +7248,6 @@ function GumballZ:Loader(Config: Loader)
 	BlackFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 	BlackFrame.BorderSizePixel = 0
 	BlackFrame.Size = UDim2.new(1, 0, 1, 0)
-
-	Blur.Size = 0;
-	Blur.Parent = game:GetService('Lighting');
-
-	GumballZ:CreateAnimation(Blur,1,{
-		Size = 60
-	})
 
 	GumballZ:CreateAnimation(BlackFrame,0.5,{
 		BackgroundTransparency = 0.7
@@ -7296,9 +7396,11 @@ function GumballZ:Loader(Config: Loader)
 			})
 		end;
 
-		GumballZ:CreateAnimation(Blur,1.5,{
-			Size = 0
-		})
+		if Blur then
+			GumballZ:CreateAnimation(Blur,1.5,{
+				Size = 0
+			})
+		end
 
 		GumballZ:CreateAnimation(BlackFrame,1.5,{
 			BackgroundTransparency = 1
@@ -7307,6 +7409,7 @@ function GumballZ:Loader(Config: Loader)
 		task.wait(1.65);
 
 		Loader:Destroy();
+		if Blur then Blur:Destroy() end
 	end;
 end;
 
