@@ -7109,7 +7109,7 @@ function GumballZ:Loader(Config: Loader)
 			
 			local cleanupObjects = {}
 			
-			-- 1. Chaotic Central Burst (Volume)
+			-- 1. Central Energy Burst (High Density)
 			local burstAtt = Instance.new("Attachment")
 			burstAtt.Parent = root
 			table.insert(cleanupObjects, burstAtt)
@@ -7119,45 +7119,81 @@ function GumballZ:Loader(Config: Loader)
 			burst.Texture = "rbxasset://textures/particles/sparkles_main.dds"
 			burst.Color = ColorSequence.new({
 				ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 255)),   -- Cyan
-				ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 0, 255)), -- Magenta
-				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 0)),  -- Yellow
-				ColorSequenceKeypoint.new(0.75, Color3.fromRGB(0, 255, 0)),   -- Green
-				ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 255))       -- Blue
+				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(170, 85, 255)), -- Purple
+				ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))   -- White
 			})
 			burst.Size = NumberSequence.new({
-				NumberSequenceKeypoint.new(0, 0.3),
-				NumberSequenceKeypoint.new(0.5, 0.8),
+				NumberSequenceKeypoint.new(0, 0.2),
+				NumberSequenceKeypoint.new(0.5, 0.6),
 				NumberSequenceKeypoint.new(1, 0)
 			})
 			burst.Transparency = NumberSequence.new({
 				NumberSequenceKeypoint.new(0, 0),
-				NumberSequenceKeypoint.new(0.8, 0.2),
+				NumberSequenceKeypoint.new(0.7, 0.5),
 				NumberSequenceKeypoint.new(1, 1)
 			})
-			burst.Lifetime = NumberRange.new(0.5, 1.2)
-			burst.Rate = 150 -- "Nhiều hạt hơn"
-			burst.Speed = NumberRange.new(2, 8)
-			burst.SpreadAngle = Vector2.new(360, 360) -- "3D hơn"
-			burst.Drag = 2 -- "Di chuyển ngẫu nhiên" (floats around)
-			burst.Acceleration = Vector3.new(0, 1, 0)
+			burst.Lifetime = NumberRange.new(0.5, 1)
+			burst.Rate = 300 -- Massive amount of particles
+			burst.Speed = NumberRange.new(2, 6)
+			burst.SpreadAngle = Vector2.new(360, 360) -- Omni-directional
+			burst.Drag = 1.5
 			burst.LightEmission = 1
-			burst.ZOffset = 0.5
-
-			-- 2. Dynamic Orbiters (Random Movement)
-			local function CreateChaoticOrbiter(speedOpts, radius)
+			burst.LockedToPart = false
+			
+			-- 2. Rising Aura (Ground to Air)
+			local aura = Instance.new("ParticleEmitter")
+			aura.Parent = burstAtt
+			aura.Texture = "rbxassetid://1084964344" -- Soft glow
+			aura.Color = ColorSequence.new(Color3.fromRGB(0, 255, 255))
+			aura.Size = NumberSequence.new(0.5)
+			aura.Rate = 100
+			aura.Lifetime = NumberRange.new(1, 1.5)
+			aura.Speed = NumberRange.new(4, 6)
+			aura.EmissionDirection = Enum.NormalId.Top
+			aura.SpreadAngle = Vector2.new(25, 25)
+			aura.Acceleration = Vector3.new(0, 5, 0)
+			aura.LightEmission = 0.8
+			
+			-- 3. Chaotic 3D Orbiters
+			local function CreateChaoticOrbiter(speedOpts, radius, color)
 				local att = Instance.new("Attachment")
 				att.Parent = root
 				table.insert(cleanupObjects, att)
 				
 				local trail = Instance.new("ParticleEmitter")
 				trail.Parent = att
-				trail.Texture = "rbxassetid://1084964344" -- Smooth Glow
-				trail.Color = ColorSequence.new(Color3.fromHSV(math.random(), 1, 1)) -- Random vivid color
+				trail.Texture = "rbxasset://textures/particles/sparkles_main.dds" 
+				trail.Color = ColorSequence.new(color)
 				trail.Size = NumberSequence.new({
-					NumberSequenceKeypoint.new(0, 0.5),
+					NumberSequenceKeypoint.new(0, 0.4),
 					NumberSequenceKeypoint.new(1, 0)
 				})
-				trail.Rate = 50
+				trail.Rate = 80
+				trail.Lifetime = NumberRange.new(0.3, 0.5)
+				trail.Speed = NumberRange.new(0)
+				trail.LockedToPart = true
+				trail.LightEmission = 1
+				
+				local t = math.random() * 10
+				local speedX, speedY, speedZ = unpack(speedOpts)
+				
+				local conn = RunService.RenderStepped:Connect(function()
+					if not root or not root.Parent then return end
+					t = t + 0.04
+					-- Lissajous 3D Path
+					local x = math.sin(t * speedX) * radius
+					local y = math.cos(t * speedY) * radius
+					local z = math.sin(t * speedZ) * radius
+					att.Position = Vector3.new(x, y, z)
+				end)
+				table.insert(cleanupObjects, conn)
+			end
+			
+			-- Spawn multiple orbiters with random intense colors
+			for i = 1, 5 do
+				local rCol = Color3.fromHSV(math.random(), 0.8, 1)
+				CreateChaoticOrbiter({math.random(2,5), math.random(2,5), math.random(2,5)}, 5, rCol)
+			end
 				trail.Lifetime = NumberRange.new(0.3, 0.5)
 				trail.Speed = NumberRange.new(0)
 				trail.LockedToPart = true
