@@ -1,5 +1,5 @@
 
-local GumballZ = loadstring(game:HttpGet("https://raw.githubusercontent.com/nughnguyen/GumballZ-UI-Library/refs/heads/main/GUI/GumballZ-UI-Lib.lua"))();
+local GumballZ = loadstring(game:HttpGet("https://raw.githubusercontent.com/nughnguyen/GumballZ-UI-Library/refs/heads/main/GUI/GumballZ-UI-Lib.luau"))();
 
 local Players = game:GetService("Players")
 local Notification = GumballZ:CreateNotifier();
@@ -28,6 +28,9 @@ local Config = {
 GumballZ:Loader({
 	Name = "GumballZ",
 	Duration = 1,
+	Particle = true,
+	ParticleDuration = 10,
+	ParticleScale = 3,
 });
 
 Notification:Notify({

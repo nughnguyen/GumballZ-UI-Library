@@ -370,7 +370,8 @@ GumballZ:Loader({
 	Name = "GumballZ",
 	Duration = 1,
 	Particle = true,
-	["particle duration"] = 3,
+	ParticleDuration = 10,
+	ParticleScale = 3,
 });
 
 Notification:Notify({

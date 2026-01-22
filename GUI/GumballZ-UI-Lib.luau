@@ -7101,106 +7101,157 @@ function GumballZ:Loader(Config: Loader)
 	Config.Duration = Config.Duration or 3.5;
 	Config.Scale = Config.Scale or 3;
 
-	-- Particle Effect Integration
+	-- Particle Effect Integration (Advanced 3D VFX)
 	if Config.Particle then
 		task.spawn(function()
-			-- Support user requested param names and legacy
+			local SPAWN_RADIUS_VFX = 30
 			local duration = Config.ParticleDuration or Config["particle duration"] or Config.Duration or 3
-			local particleScale = Config.ParticleScale or 5 -- Default to 5 orbiters
+			local density = Config.ParticleScale or 3 -- Number of particles spawning per wave/interval
 			
 			local char = Client.Character or Client.CharacterAdded:Wait()
 			local root = char:WaitForChild("HumanoidRootPart", 5)
 			if not root then return end
 			
 			local cleanupObjects = {}
+			local activeParticles = {}
 			
-			-- 1. Central Energy Burst (High Density)
-			local burstAtt = Instance.new("Attachment")
-			burstAtt.Parent = root
-			table.insert(cleanupObjects, burstAtt)
+			-- Utility: Random Point on Circle (XZ Plane)
+			local function randomXZPoint_v(center, radius)
+				local angle = math.random() * 2 * math.pi
+				local r = math.sqrt(math.random()) * radius -- Uniform distribution in circle
+				local x = center.X + r * math.cos(angle)
+				local z = center.Z + r * math.sin(angle)
+				return Vector3.new(x, center.Y - 2, z) -- Start slightly below/at ground level
+			end
+
+			-- Utility: Quadratic Bezier Curve
+			local function bezierQuad_v(t, p0, p1, p2)
+				return (1 - t)^2 * p0 + 2 * (1 - t) * t * p1 + t^2 * p2
+			end
 			
-			local burst = Instance.new("ParticleEmitter")
-			burst.Parent = burstAtt
-			burst.Texture = "rbxasset://textures/particles/sparkles_main.dds"
-			burst.Color = ColorSequence.new({
-				ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 255, 255)),   -- Cyan
-				ColorSequenceKeypoint.new(0.5, Color3.fromRGB(170, 85, 255)), -- Purple
-				ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))   -- White
-			})
-			burst.Size = NumberSequence.new({
-				NumberSequenceKeypoint.new(0, 0.2),
-				NumberSequenceKeypoint.new(0.5, 0.6),
-				NumberSequenceKeypoint.new(1, 0)
-			})
-			burst.Transparency = NumberSequence.new({
-				NumberSequenceKeypoint.new(0, 0),
-				NumberSequenceKeypoint.new(0.7, 0.5),
-				NumberSequenceKeypoint.new(1, 1)
-			})
-			burst.Lifetime = NumberRange.new(0.5, 1)
-			burst.Rate = 300
-			burst.Speed = NumberRange.new(2, 6)
-			burst.SpreadAngle = Vector2.new(360, 360)
-			burst.Drag = 1.5
-			burst.LightEmission = 1
-			burst.LockedToPart = false
-			
-			-- 2. Rising Aura (Ground to Air)
-			local aura = Instance.new("ParticleEmitter")
-			aura.Parent = burstAtt
-			aura.Texture = "rbxassetid://1084964344" -- Soft glow
-			aura.Color = ColorSequence.new(Color3.fromRGB(0, 255, 255))
-			aura.Size = NumberSequence.new(0.5)
-			aura.Rate = 100
-			aura.Lifetime = NumberRange.new(1, 1.5)
-			aura.Speed = NumberRange.new(4, 6)
-			aura.EmissionDirection = Enum.NormalId.Top
-			aura.SpreadAngle = Vector2.new(25, 25)
-			aura.Acceleration = Vector3.new(0, 5, 0)
-			aura.LightEmission = 0.8
-			
-			-- 3. Chaotic 3D Orbiters
-			local function CreateChaoticOrbiter(speedOpts, radius, color)
-				local att = Instance.new("Attachment")
-				att.Parent = root
+			-- Utility: Create Impact Effect on Player
+			local function spawnHRPEffect_v()
+				if not root then return end
+				local att = Instance.new("Attachment", root)
 				table.insert(cleanupObjects, att)
 				
-				local trail = Instance.new("ParticleEmitter")
-				trail.Parent = att
-				trail.Texture = "rbxasset://textures/particles/sparkles_main.dds" 
-				trail.Color = ColorSequence.new(color)
-				trail.Size = NumberSequence.new({
-					NumberSequenceKeypoint.new(0, 0.4),
+				local emitter = Instance.new("ParticleEmitter")
+				emitter.Parent = att
+				emitter.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+				emitter.Color = ColorSequence.new({
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(184, 0, 255)),
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 150))
+				})
+				emitter.Size = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 0.5),
 					NumberSequenceKeypoint.new(1, 0)
 				})
-				trail.Rate = 80
-				trail.Lifetime = NumberRange.new(0.3, 0.5)
-				trail.Speed = NumberRange.new(0)
-				trail.LockedToPart = true
+				emitter.Lifetime = NumberRange.new(0.5)
+				emitter.Rate = 0
+				emitter.Speed = NumberRange.new(5, 8)
+				emitter.SpreadAngle = Vector2.new(360, 360)
+				emitter.LightEmission = 1
+				emitter.Emit(emitter, 10) -- Burst
+				
+				task.delay(1, function() att:Destroy() end)
+			end
+
+			-- Main: Spawn a Homing Particle
+			local function spawnHomingParticle()
+				local startPos = randomXZPoint_v(root.Position, SPAWN_RADIUS_VFX)
+				
+				-- The Flying Part
+				local part = Instance.new("Part")
+				part.Size = Vector3.new(0.5, 0.5, 0.5)
+				part.Transparency = 1
+				part.CanCollide = false
+				part.Anchored = true
+				part.Position = startPos
+				part.Parent = workspace
+				table.insert(cleanupObjects, part)
+				table.insert(activeParticles, part)
+
+				-- Visuals: BillboardGui with Image
+				local bb = Instance.new("BillboardGui")
+				bb.Size = UDim2.new(2, 0, 2, 0)
+				bb.AlwaysOnTop = true
+				bb.Parent = part
+				
+				local img = Instance.new("ImageLabel")
+				img.BackgroundTransparency = 1
+				img.Size = UDim2.new(1, 0, 1, 0)
+				img.Image = "rbxassetid://112882057182762" -- Star/Glow Icon
+				img.ImageColor3 = Color3.fromRGB(184, 0, 255)
+				img.Parent = bb
+				
+				-- Visuals: Trail
+				local att0 = Instance.new("Attachment", part)
+				local att1 = Instance.new("Attachment", part)
+				att0.Position = Vector3.new(0, 0.25, 0)
+				att1.Position = Vector3.new(0, -0.25, 0)
+				
+				local trail = Instance.new("Trail")
+				trail.Parent = part
+				trail.Attachment0 = att0
+				trail.Attachment1 = att1
+				trail.FaceCamera = true
+				trail.Lifetime = 0.3
+				trail.Color = ColorSequence.new({
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(184, 0, 255)), -- Purple
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 150)) -- Light Yellow
+				})
+				trail.WidthScale = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 1),
+					NumberSequenceKeypoint.new(1, 0)
+				})
 				trail.LightEmission = 1
+
+				-- Movement Logic
+				local t = 0
+				local speed = 1.5 + math.random() -- Random speed variation
+				local height = 15 + math.random(5, 10) -- Random arc height
 				
-				local t = math.random() * 10
-				local speedX, speedY, speedZ = unpack(speedOpts)
-				
-				local conn = RunService.RenderStepped:Connect(function()
-					if not root or not root.Parent then return end
-					t = t + 0.04
-					-- Lissajous 3D Path
-					local x = math.sin(t * speedX) * radius
-					local y = math.cos(t * speedY) * radius
-					local z = math.sin(t * speedZ) * radius
-					att.Position = Vector3.new(x, y, z)
+				local p0 = startPos
+				-- Connection for animation
+				local conn
+				conn = RunService.RenderStepped:Connect(function(dt)
+					if not part.Parent or not root.Parent then 
+						if conn then conn:Disconnect() end
+						return 
+					end
+					
+					t = t + dt * speed
+					if t >= 1 then
+						-- Hit Target
+						spawnHRPEffect_v()
+						part:Destroy()
+						conn:Disconnect()
+						return
+					end
+					
+					local p2 = root.Position -- Dynamic Target (Homing)
+					local mid = (p0 + p2) / 2
+					local p1 = mid + Vector3.new(0, height, 0) -- Control point for curve
+					
+					part.Position = bezierQuad_v(t, p0, p1, p2)
 				end)
 				table.insert(cleanupObjects, conn)
 			end
 			
-			-- Spawn multiple orbiters based on ParticleScale
-			for i = 1, particleScale do
-				local rCol = Color3.fromHSV(math.random(), 0.8, 1)
-				CreateChaoticOrbiter({math.random(2,5), math.random(2,5), math.random(2,5)}, 5, rCol)
-			end
+			-- Spawner Loop
+			local spawning = true
+			task.spawn(function()
+				while spawning do
+					for i=1, density do
+						spawnHomingParticle()
+						task.wait(math.random(0.1, 0.3))
+					end
+					task.wait(0.5)
+				end
+			end)
 			
 			task.delay(duration, function()
+				spawning = false
 				for _, v in pairs(cleanupObjects) do
 					if typeof(v) == "Instance" then v:Destroy()
 					elseif typeof(v) == "RBXScriptConnection" then v:Disconnect()
