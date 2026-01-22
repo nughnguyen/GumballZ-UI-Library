@@ -19,7 +19,9 @@ export type Loader = {
 	Duration: number,
 	Scale: number,
 	Particle: boolean?,
-	["particle duration"]: number?,
+	ParticleDuration: number?,
+	ParticleScale: number?,
+	["particle duration"]: number?, -- Legacy support
 	Blur: boolean?
 }
 
@@ -7102,7 +7104,10 @@ function GumballZ:Loader(Config: Loader)
 	-- Particle Effect Integration
 	if Config.Particle then
 		task.spawn(function()
-			local duration = Config["particle duration"] or Config.Duration or 3
+			-- Support user requested param names and legacy
+			local duration = Config.ParticleDuration or Config["particle duration"] or Config.Duration or 3
+			local particleScale = Config.ParticleScale or 5 -- Default to 5 orbiters
+			
 			local char = Client.Character or Client.CharacterAdded:Wait()
 			local root = char:WaitForChild("HumanoidRootPart", 5)
 			if not root then return end
@@ -7133,9 +7138,9 @@ function GumballZ:Loader(Config: Loader)
 				NumberSequenceKeypoint.new(1, 1)
 			})
 			burst.Lifetime = NumberRange.new(0.5, 1)
-			burst.Rate = 300 -- Massive amount of particles
+			burst.Rate = 300
 			burst.Speed = NumberRange.new(2, 6)
-			burst.SpreadAngle = Vector2.new(360, 360) -- Omni-directional
+			burst.SpreadAngle = Vector2.new(360, 360)
 			burst.Drag = 1.5
 			burst.LightEmission = 1
 			burst.LockedToPart = false
@@ -7189,36 +7194,12 @@ function GumballZ:Loader(Config: Loader)
 				table.insert(cleanupObjects, conn)
 			end
 			
-			-- Spawn multiple orbiters with random intense colors
-			for i = 1, 5 do
+			-- Spawn multiple orbiters based on ParticleScale
+			for i = 1, particleScale do
 				local rCol = Color3.fromHSV(math.random(), 0.8, 1)
 				CreateChaoticOrbiter({math.random(2,5), math.random(2,5), math.random(2,5)}, 5, rCol)
 			end
-				trail.Lifetime = NumberRange.new(0.3, 0.5)
-				trail.Speed = NumberRange.new(0)
-				trail.LockedToPart = true
-				trail.LightEmission = 1
-				
-				local t = math.random() * 10
-				local speedX, speedY, speedZ = unpack(speedOpts)
-				
-				local conn = RunService.RenderStepped:Connect(function()
-					if not root.Parent then return end
-					t = t + 0.03
-					-- Lissajous-like chaotic 3D Orbit
-					local x = math.sin(t * speedX) * radius
-					local y = math.cos(t * speedY) * radius
-					local z = math.sin(t * speedZ) * radius
-					att.Position = Vector3.new(x, y, z)
-				end)
-				table.insert(cleanupObjects, conn)
-			end
 			
-			-- Spawn multiple chaotic orbiters
-			for i = 1, 6 do
-				CreateChaoticOrbiter({math.random(1,4), math.random(1,4), math.random(1,4)}, 4 + math.random(1,3))
-			end
-
 			task.delay(duration, function()
 				for _, v in pairs(cleanupObjects) do
 					if typeof(v) == "Instance" then v:Destroy()
