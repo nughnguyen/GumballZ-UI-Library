@@ -7156,86 +7156,106 @@ function GumballZ:Loader(Config: Loader)
 				task.delay(1, function() att:Destroy() end)
 			end
 
-			-- Main: Spawn a Homing Particle
+			-- Main: Spawn a Homing Particle (Replicating exact behavior)
 			local function spawnHomingParticle()
 				local startPos = randomXZPoint_v(root.Position, SPAWN_RADIUS_VFX)
 				
 				-- The Flying Part
 				local part = Instance.new("Part")
-				part.Size = Vector3.new(0.5, 0.5, 0.5)
+				part.Size = Vector3.new(1, 1, 1) -- Match ref
 				part.Transparency = 1
 				part.CanCollide = false
 				part.Anchored = true
 				part.Position = startPos
 				part.Parent = workspace
 				table.insert(cleanupObjects, part)
-				table.insert(activeParticles, part)
 
 				-- Visuals: BillboardGui with Image
 				local bb = Instance.new("BillboardGui")
-				bb.Size = UDim2.new(2, 0, 2, 0)
+				bb.Size = UDim2.new(3, 0, 3, 0) -- Match ref
 				bb.AlwaysOnTop = true
 				bb.Parent = part
 				
 				local img = Instance.new("ImageLabel")
 				img.BackgroundTransparency = 1
 				img.Size = UDim2.new(1, 0, 1, 0)
-				img.Image = "rbxassetid://112882057182762" -- Star/Glow Icon
-				img.ImageColor3 = Color3.fromRGB(184, 0, 255)
+				img.AnchorPoint = Vector2.new(0.5,0.5)
+				img.Position = UDim2.new(0.5,0.5,0.5,0)
+				img.Image = "rbxassetid://112882057182762"
+				img.ImageColor3 = Color3.fromRGB(224,74,255) -- Match ref
 				img.Parent = bb
 				
 				-- Visuals: Trail
 				local att0 = Instance.new("Attachment", part)
 				local att1 = Instance.new("Attachment", part)
-				att0.Position = Vector3.new(0, 0.25, 0)
-				att1.Position = Vector3.new(0, -0.25, 0)
+				att0.Position = Vector3.new(0, -0.25, 0)
+				att1.Position = Vector3.new(0, 0.25, 0)
 				
 				local trail = Instance.new("Trail")
 				trail.Parent = part
 				trail.Attachment0 = att0
 				trail.Attachment1 = att1
 				trail.FaceCamera = true
-				trail.Lifetime = 0.3
+				trail.MinLength = 1
+				trail.MaxLength = 8
+				trail.Lifetime = 0.25
+				trail.LightInfluence = 1
 				trail.Color = ColorSequence.new({
-					ColorSequenceKeypoint.new(0, Color3.fromRGB(184, 0, 255)), -- Purple
-					ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 150)) -- Light Yellow
+					ColorSequenceKeypoint.new(0, Color3.fromRGB(184, 0, 255)),
+					ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 237, 135))
 				})
 				trail.WidthScale = NumberSequence.new({
 					NumberSequenceKeypoint.new(0, 1),
 					NumberSequenceKeypoint.new(1, 0)
 				})
-				trail.LightEmission = 1
+				trail.Transparency = NumberSequence.new({
+					NumberSequenceKeypoint.new(0, 0),
+					NumberSequenceKeypoint.new(1, 1)
+				})
 
-				-- Movement Logic
-				local t = 0
-				local speed = 1.5 + math.random() -- Random speed variation
-				local height = 15 + math.random(5, 10) -- Random arc height
-				
-				local p0 = startPos
-				-- Connection for animation
-				local conn
-				conn = RunService.RenderStepped:Connect(function(dt)
-					if not part.Parent or not root.Parent then 
-						if conn then conn:Disconnect() end
-						return 
+				-- Movement Logic: Threaded for simplified Wait() usage (as per reference)
+				task.spawn(function()
+					local LIFT_AMOUNT = 2
+					local LIFT_TIME = 0.45
+					local ARC_DELAY = 1
+					local ARC_TIME = 0.6
+					
+					-- Phase 1: Lift Up
+					local targetLiftCFrame = part.CFrame * CFrame.new(0, LIFT_AMOUNT, 0)
+					local liftTween = TweenService:Create(part, TweenInfo.new(LIFT_TIME, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {CFrame = targetLiftCFrame})
+					liftTween:Play()
+					
+					task.wait(LIFT_TIME + ARC_DELAY)
+					
+					-- Phase 2: Homing Arc
+					if not part.Parent or not root.Parent then return end
+					
+					local startP = part.Position
+					local t0 = tick()
+					
+					while true do
+						if not part.Parent or not root.Parent then break end
+						local alpha = (tick() - t0) / ARC_TIME
+						if alpha >= 1 then break end
+
+						local currentEnd = root.Position
+						local mid = (startP + currentEnd) / 2
+						local height = math.max(6, (currentEnd.Y - startP.Y) * 0.5 + 6)
+						local control = mid + Vector3.new(0, height, 0) -- Control point
+
+						local pos = bezierQuad_v(alpha, startP, control, currentEnd)
+						part.CFrame = CFrame.new(pos)
+
+						RunService.RenderStepped:Wait()
 					end
 					
-					t = t + dt * speed
-					if t >= 1 then
-						-- Hit Target
+					-- Phase 3: Impact
+					if part.Parent and root.Parent then
+						part.CFrame = CFrame.new(root.Position)
 						spawnHRPEffect_v()
 						part:Destroy()
-						conn:Disconnect()
-						return
 					end
-					
-					local p2 = root.Position -- Dynamic Target (Homing)
-					local mid = (p0 + p2) / 2
-					local p1 = mid + Vector3.new(0, height, 0) -- Control point for curve
-					
-					part.Position = bezierQuad_v(t, p0, p1, p2)
 				end)
-				table.insert(cleanupObjects, conn)
 			end
 			
 			-- Spawner Loop
